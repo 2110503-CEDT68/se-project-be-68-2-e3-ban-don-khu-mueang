@@ -1,0 +1,36 @@
+@startuml MasQ_UseCase
+
+left to right direction
+actor "User" as user
+actor "Admin" as admin
+
+admin -|> user
+
+package MasQ {
+  usecase "Register" as Register
+  usecase "Login" as Login
+  usecase "Logout" as Logout
+  usecase "View Profile" as ViewProfile
+  
+  usecase "View Massages" as ViewMassages
+  usecase "Manage Massages\n(Create, Update, Delete)" as ManageMassages
+  
+  usecase "Manage Own Reservations\n(Create, View, Update, Delete)" as ManageOwnReservations
+  usecase "Rate Reservation" as RateReservation
+  usecase "Manage All Reservations\n(View, Update, Delete)" as ManageAllReservations
+  usecase "Register Admin" as RegisterAdmin
+}
+
+user --> Register
+user --> Login
+user --> Logout
+user --> ViewProfile
+user --> ViewMassages
+user --> ManageOwnReservations
+user --> RateReservation
+
+admin --> RegisterAdmin
+admin --> ManageMassages
+admin --> ManageAllReservations
+
+@enduml

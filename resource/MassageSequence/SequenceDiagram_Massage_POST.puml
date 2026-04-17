@@ -1,0 +1,26 @@
+@startuml Manage_Massage_POST
+
+title "Manage Massage (POST)"
+
+header MasQ Sequence Diagram
+footer Page %page% of %lastpage%
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:massages" as routerMassages
+participant "<<controllers>>\n:massages" as controllersMassages
+participant "<<model>>\n:Massage" as modelMassage
+database "<<MongoDB>>\n:massages" as MassagesDatabase
+
+client->server ++:req.post('/api/massages')
+server->routerMassages ++:app.use('/api/massages',massages)
+routerMassages -> controllersMassages ++:createMassage()
+
+controllersMassages->modelMassage ++:create(req.body)
+modelMassage ->MassagesDatabase ++: MassageSchema
+MassagesDatabase --> modelMassage --: massage
+controllersMassages <-- modelMassage --:massage
+
+controllersMassages->client --:response
+
+@enduml

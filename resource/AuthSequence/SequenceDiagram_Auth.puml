@@ -1,0 +1,93 @@
+@startuml Manage_Auth
+
+header MasQ Sequence Diagram
+footer Page %page% of %lastpage%
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:auth" as routerAuth
+participant "<<controllers>>\n:auth" as controllersAuth
+participant "<<model>>\n:User" as modelUser
+database "<<MongoDB>>\n:users" as UsersDatabase
+
+' ==========================================
+' POST (REGISTER)
+' ==========================================
+== Manage Auth (POST - Register) ==
+
+client->server ++:req.post('/api/auth/register')
+server->routerAuth ++:app.use('/api/auth',auth)
+routerAuth -> controllersAuth ++:register()
+controllersAuth->modelUser ++:findOne({ email })
+modelUser ->UsersDatabase ++: UserSchema
+UsersDatabase --> modelUser --: null
+controllersAuth <-- modelUser --:null
+controllersAuth->modelUser ++:create(req.body)
+modelUser ->UsersDatabase ++: UserSchema
+UsersDatabase --> modelUser --: user
+controllersAuth <-- modelUser --:user
+controllersAuth->client --:response (token)
+
+newpage
+
+' ==========================================
+' POST (REGISTER ADMIN)
+' ==========================================
+== Manage Auth (POST - Register Admin) ==
+
+client->server ++:req.post('/api/auth/register-admin')
+server->routerAuth ++:app.use('/api/auth',auth)
+routerAuth -> controllersAuth ++:registerAdmin()
+controllersAuth->modelUser ++:create(req.body, role: "admin")
+modelUser ->UsersDatabase ++: UserSchema
+UsersDatabase --> modelUser --: user
+controllersAuth <-- modelUser --:user
+controllersAuth->client --:response (token)
+
+newpage
+
+' ==========================================
+' POST (LOGIN)
+' ==========================================
+== Manage Auth (POST - Login) ==
+
+client->server ++:req.post('/api/auth/login')
+server->routerAuth ++:app.use('/api/auth',auth)
+routerAuth -> controllersAuth ++:login()
+controllersAuth->modelUser ++:findOne({ email })
+modelUser ->UsersDatabase ++: UserSchema
+UsersDatabase --> modelUser --: user
+controllersAuth <-- modelUser --:user
+controllersAuth->modelUser ++:matchPassword(password)
+modelUser --> controllersAuth --:isMatch
+controllersAuth->client --:response (token)
+
+newpage
+
+' ==========================================
+' GET (GET ME)
+' ==========================================
+== Manage Auth (GET - Get Me) ==
+
+client->server ++:req.get('/api/auth/me')
+server->routerAuth ++:app.use('/api/auth',auth)
+routerAuth -> controllersAuth ++:getMe()
+controllersAuth->modelUser ++:findById(req.user.id)
+modelUser ->UsersDatabase ++: UserSchema
+UsersDatabase --> modelUser --: user
+controllersAuth <-- modelUser --:user
+controllersAuth->client --:response
+
+newpage
+
+' ==========================================
+' GET (LOGOUT)
+' ==========================================
+== Manage Auth (GET - Logout) ==
+
+client->server ++:req.get('/api/auth/logout')
+server->routerAuth ++:app.use('/api/auth',auth)
+routerAuth -> controllersAuth ++:logout()
+controllersAuth->client --:response (clear cookie)
+
+@enduml

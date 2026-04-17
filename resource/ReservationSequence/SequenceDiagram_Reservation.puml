@@ -1,0 +1,115 @@
+@startuml Manage_Reservation
+
+header MasQ Sequence Diagram
+footer Page %page% of %lastpage%
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:reservations" as routerReservations
+participant "<<controllers>>\n:reservations" as controllersReservations
+participant "<<model>>\n:Reservation" as modelReservation
+database "<<MongoDB>>\n:reservations" as ReservationsDatabase
+
+' ==========================================
+' POST (ADD RESERVATION)
+' ==========================================
+== Manage Reservation (POST - Add Reservation) ==
+
+client->server ++:req.post('/api/reservations')
+server->routerReservations ++:app.use('/api/reservations',reservations)
+routerReservations -> controllersReservations ++:addReservation()
+controllersReservations->modelReservation ++:create(req.body)
+modelReservation ->ReservationsDatabase ++: ReservationSchema
+ReservationsDatabase --> modelReservation --: reservation
+controllersReservations <-- modelReservation --:reservation
+controllersReservations->client --:response
+
+newpage
+
+' ==========================================
+' GET ALL
+' ==========================================
+== Manage Reservation (GET ALL) ==
+
+client->server ++:req.get('/api/reservations')
+server->routerReservations ++:app.use('/api/reservations',reservations)
+routerReservations -> controllersReservations ++:getReservations()
+controllersReservations->modelReservation ++:find()
+modelReservation ->ReservationsDatabase ++: ReservationSchema
+ReservationsDatabase --> modelReservation --: reservations
+controllersReservations <-- modelReservation --:reservations
+controllersReservations->client --:response
+
+newpage
+
+' ==========================================
+' GET ONE
+' ==========================================
+== Manage Reservation (GET One) ==
+
+client->server ++:req.get('/api/reservations/:id')
+server->routerReservations ++:app.use('/api/reservations',reservations)
+routerReservations -> controllersReservations ++:getReservation()
+controllersReservations->modelReservation ++:findById(req.params.id)
+modelReservation ->ReservationsDatabase ++: ReservationSchema
+ReservationsDatabase --> modelReservation --: reservation
+controllersReservations <-- modelReservation --:reservation
+controllersReservations->client --:response
+
+newpage
+
+' ==========================================
+' PUT (UPDATE)
+' ==========================================
+== Manage Reservation (PUT) ==
+
+client->server ++:req.put('/api/reservations/:id')
+server->routerReservations ++:app.use('/api/reservations',reservations)
+routerReservations -> controllersReservations ++:updateReservation()
+controllersReservations->modelReservation ++:findByIdAndUpdate(req.params.id, req.body)
+modelReservation ->ReservationsDatabase ++: ReservationSchema
+ReservationsDatabase --> modelReservation --: reservation
+controllersReservations <-- modelReservation --:reservation
+controllersReservations->client --:response
+
+newpage
+
+' ==========================================
+' DELETE
+' ==========================================
+== Manage Reservation (DELETE) ==
+
+client->server ++:req.delete('/api/reservations/:id')
+server->routerReservations ++:app.use('/api/reservations',reservations)
+routerReservations -> controllersReservations ++:deleteReservation()
+controllersReservations->modelReservation ++:findById(req.params.id)
+modelReservation ->ReservationsDatabase ++: ReservationSchema
+ReservationsDatabase --> modelReservation --: reservation
+controllersReservations <-- modelReservation --:reservation
+controllersReservations->modelReservation ++:deleteOne()
+modelReservation ->ReservationsDatabase ++: ReservationSchema
+ReservationsDatabase --> modelReservation --: void
+controllersReservations <-- modelReservation --:void
+controllersReservations->client --:response
+
+newpage
+
+' ==========================================
+' PATCH (RATE RESERVATION)
+' ==========================================
+== Manage Reservation (PATCH - Rate Reservation) ==
+
+client->server ++:req.patch('/api/reservations/:id/rate')
+server->routerReservations ++:app.use('/api/reservations',reservations)
+routerReservations -> controllersReservations ++:rateReservation()
+controllersReservations->modelReservation ++:findById(req.params.id)
+modelReservation ->ReservationsDatabase ++: ReservationSchema
+ReservationsDatabase --> modelReservation --: reservation
+controllersReservations <-- modelReservation --:reservation
+controllersReservations->modelReservation ++:save()
+modelReservation ->ReservationsDatabase ++: ReservationSchema
+ReservationsDatabase --> modelReservation --: updatedReservation
+controllersReservations <-- modelReservation --:updatedReservation
+controllersReservations->client --:response
+
+@enduml

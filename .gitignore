@@ -1,0 +1,12 @@
+#ignore node_modules
+node_modules/*
+
+#ignore config
+config/config.env
+tests/api-tester.html
+tests/frontend.html
+logs.txt
+tests/nginx.conf
+
+#ignore tests
+tests/*

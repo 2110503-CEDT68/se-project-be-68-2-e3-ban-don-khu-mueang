@@ -1,0 +1,19 @@
+@startuml Manage_Auth_Logout
+
+title "Manage Auth (GET - Logout)"
+
+header MasQ Sequence Diagram
+footer Page %page% of %lastpage%
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:auth" as routerAuth
+participant "<<controllers>>\n:auth" as controllersAuth
+
+client->server ++:req.get('/api/auth/logout')
+server->routerAuth ++:app.use('/api/auth',auth)
+routerAuth -> controllersAuth ++:logout()
+
+controllersAuth->client --:response (clear cookie)
+
+@enduml

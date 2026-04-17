@@ -1,0 +1,31 @@
+@startuml Manage_Auth_Register
+
+title "Manage Auth (POST - Register)"
+
+header MasQ Sequence Diagram
+footer Page %page% of %lastpage%
+
+participant "Client" as client
+participant "<<javaScript>>\n:server" as server
+participant "<<router>>\n:auth" as routerAuth
+participant "<<controllers>>\n:auth" as controllersAuth
+participant "<<model>>\n:User" as modelUser
+database "<<MongoDB>>\n:users" as UsersDatabase
+
+client->server ++:req.post('/api/auth/register')
+server->routerAuth ++:app.use('/api/auth',auth)
+routerAuth -> controllersAuth ++:register()
+
+controllersAuth->modelUser ++:findOne({ email })
+modelUser ->UsersDatabase ++: UserSchema
+UsersDatabase --> modelUser --: null
+controllersAuth <-- modelUser --:null
+
+controllersAuth->modelUser ++:create(req.body)
+modelUser ->UsersDatabase ++: UserSchema
+UsersDatabase --> modelUser --: user
+controllersAuth <-- modelUser --:user
+
+controllersAuth->client --:response (token)
+
+@enduml

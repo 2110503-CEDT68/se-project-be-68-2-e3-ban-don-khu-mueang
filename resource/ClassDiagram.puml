@@ -1,0 +1,80 @@
+@startuml
+left to right direction
+package "MasQ"{
+    class "<<Application>>\nMasQService" as MasQService{}
+
+    class "<<Resource>>\nMassages" as ResourceMassages{
+        <<GET>> +getMassages():Massage
+        <<POST>> +createMassage():Massage
+    }
+
+    class "<<Resource>>\nMassage" as ResourceMassage {
+        <<GET>> +getMassage(): Massage
+        <<PUT>> +updateMassage(): Massage
+        <<DELETE>> +deleteMassage(): void
+    }
+
+    class "<<Representation>>\nMassage" as RepresentationMassage {
+        -name
+        -address
+        -district
+        -province
+        -postalcode
+        -tel
+        -pictures
+        -price
+        -ratingSum
+        -userRatingCount
+        -averageRating
+    }
+
+    class "<<Resource>>\nReservations" as ResourceReservations{
+        <<GET>> +getReservations():Reservation
+        <<POST>> +addReservation():Reservation
+    }
+
+    class "<<Resource>>\nReservation" as ResourceReservation {
+        <<GET>> +getReservation(): Reservation
+        <<PUT>> +updateReservation(): Reservation
+        <<DELETE>> +deleteReservation(): void
+        <<PATCH>> +rateReservation(): Reservation
+    }
+
+    class "<<Representation>>\nReservation" as RepresentationReservation {
+        -reserveDate
+        -user
+        -massage
+        -rating
+        -isRated
+    }
+
+    class "<<Resource>>\nAuth" as ResourceAuth{
+        <<GET>> +getMe(): User
+        <<POST>> +login(): Token
+        <<GET>> +logout(): void
+        <<POST>> +register(): Token
+        <<POST>> +registerAdmin(): Token
+    }
+
+    class "<<Representation>>\nUser" as RepresentationUser {
+        -name
+        -tel
+        -email
+        -password
+        -role
+    }
+}
+
+MasQService ..> ResourceMassages:"/massages\n<<Path>>"
+ResourceMassages ..> ResourceMassage: "/{id}\n<<Path>>"
+ResourceMassage ..> RepresentationMassage: "<<use>>"
+
+ResourceMassage ..> ResourceReservations: "/reservations\n<<Path>>"
+MasQService ..> ResourceReservations:"/reservations\n<<Path>>"
+ResourceReservations ..> ResourceReservation: "/{id}\n<<Path>>"
+ResourceReservation ..> RepresentationReservation: "<<use>>"
+
+MasQService ..> ResourceAuth:"/auth\n<<Path>>"
+ResourceAuth ..> RepresentationUser: "<<use>>"
+
+@enduml
