@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-require('./Rating');
+require('./Review');
 
 const MassageSchema = new mongoose.Schema({
     name: {
@@ -72,7 +72,7 @@ MassageSchema.virtual('reservations', {
 MassageSchema.pre('deleteOne', { document: true, query: false }, async function () {
     console.log(`Reservations being removed from massage shop ${this._id}`);
     await this.model('Reservation').deleteMany({ massage: this._id });
-    await this.model('Rating').deleteMany({ massage: this._id });
+    await this.model('Review').deleteMany({ massage: this._id });
 });
 
 module.exports = mongoose.model('Massage', MassageSchema);

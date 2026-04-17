@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const ratingSchema = new mongoose.Schema(
+const reviewSchema = new mongoose.Schema(
     {
         reservation: {
             type: mongoose.Schema.Types.ObjectId,
@@ -36,10 +36,10 @@ const ratingSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// Prevent duplicate ratings for the same reservation
-ratingSchema.index({ reservation: 1 }, { unique: true });
+// Prevent duplicate reviews for the same reservation
+reviewSchema.index({ reservation: 1 }, { unique: true });
 
-ratingSchema.statics.getAverageRating = async function (massageId) {
+reviewSchema.statics.getAverageRating = async function (massageId) {
     try {
         const obj = await this.aggregate([
             {
@@ -73,14 +73,14 @@ ratingSchema.statics.getAverageRating = async function (massageId) {
     }
 };
 
-ratingSchema.post('save', async function () {
+reviewSchema.post('save', async function () {
     await this.constructor.getAverageRating(this.massage);
 });
 
-ratingSchema.post('deleteOne', { document: true, query: false }, async function () {
+reviewSchema.post('deleteOne', { document: true, query: false }, async function () {
     await this.constructor.getAverageRating(this.massage);
 });
 
-const Rating = mongoose.model('Rating', ratingSchema);
+const Review = mongoose.model('Review', reviewSchema);
 
-module.exports = Rating;
+module.exports = Review;

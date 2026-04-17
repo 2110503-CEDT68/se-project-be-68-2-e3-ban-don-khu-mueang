@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-require('./Rating');
+require('./Review');
 
 const ReservationSchema = new mongoose.Schema({
     reserveDate: {
@@ -16,6 +16,24 @@ const ReservationSchema = new mongoose.Schema({
         ref: 'Massage',
         required: true
     },
+    discount: [
+        {
+            name: {
+                type: String,
+                required: true
+            },
+            amount: {
+                type: Number,
+                required: true,
+                min: 0
+            }
+        }
+    ],
+    netPrice: {
+        type: Number,
+        required: true,
+        min: 0
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -23,7 +41,7 @@ const ReservationSchema = new mongoose.Schema({
 });
 
 ReservationSchema.post('deleteOne', { document: true, query: false }, async function () {
-    await this.model('Rating').deleteOne({ reservation: this._id });
+    await this.model('Review').deleteOne({ reservation: this._id });
 });
 
 module.exports = mongoose.model('Reservation', ReservationSchema);

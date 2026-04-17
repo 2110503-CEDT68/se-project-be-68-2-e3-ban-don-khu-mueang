@@ -1,6 +1,6 @@
 const Reservation = require('../models/Reservation');
 const Massage = require('../models/Massage');
-const { createRatingFromReservation } = require('./reviews');
+const { createReviewFromReservation } = require('./reviews');
 
 //@desc     Get all reservations
 //@route    GET /api/reservations
@@ -200,10 +200,10 @@ exports.deleteReservation = async (req, res, next) => {
     }
 };
 
-//@desc     Rate a reservation
-//@route    PATCH /api/reservations/:id/rate
+//@desc     Review a reservation
+//@route    PATCH /api/reservations/:id/review
 //@access   Private (owner only)
-exports.rateReservation = async (req, res, next) => {
+const reviewReservation = async (req, res, next) => {
     try {
         const reservation = await Reservation.findById(req.params.id);
 
@@ -222,16 +222,19 @@ exports.rateReservation = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'Please provide a whole number rating between 1 and 5' });
         }
 
-        const createdRating = await createRatingFromReservation({
+        const createdReview = await createReviewFromReservation({
             reservation,
             userId: req.user.id,
             ratingValue,
             comment
         });
 
-        res.status(200).json({ success: true, data: createdRating });
+        res.status(200).json({ success: true, data: createdReview });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ success: false, message: 'Cannot rate reservation' });
+        return res.status(500).json({ success: false, message: 'Cannot review reservation' });
     }
 };
+
+exports.reviewReservation = reviewReservation;
+exports.rateReservation = reviewReservation;

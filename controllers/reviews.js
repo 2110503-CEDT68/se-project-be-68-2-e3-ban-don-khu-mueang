@@ -1,16 +1,16 @@
 const mongoose = require('mongoose');
 const Reservation = require('../models/Reservation');
-const Rating = require('../models/Rating');
+const Review = require('../models/Review');
 
 const validateRatingValue = (ratingValue) => {
     return ratingValue !== undefined && Number.isInteger(Number(ratingValue)) && Number(ratingValue) >= 1 && Number(ratingValue) <= 5;
 };
 
-const createRatingFromReservation = async ({ reservation, userId, ratingValue, comment }) => {
-    const existingRating = await Rating.findOne({ reservation: reservation._id });
+const createReviewFromReservation = async ({ reservation, userId, ratingValue, comment }) => {
+    const existingReview = await Review.findOne({ reservation: reservation._id });
 
-    if (existingRating) {
-        const error = new Error('You have already rated this reservation');
+    if (existingReview) {
+        const error = new Error('You have already reviewed this reservation');
         error.statusCode = 400;
         throw error;
     }
@@ -36,7 +36,7 @@ const createRatingFromReservation = async ({ reservation, userId, ratingValue, c
         }
     }
 
-    return Rating.create(reviewPayload);
+    return Review.create(reviewPayload);
 };
 
 // @desc    Create a review for a reservation
@@ -68,7 +68,7 @@ exports.createReview = async (req, res, next) => {
             return res.status(401).json({ success: false, message: `User ${req.user.id} is not authorized to review this reservation` });
         }
 
-        const review = await createRatingFromReservation({
+        const review = await createReviewFromReservation({
             reservation,
             userId: req.user.id,
             ratingValue: rating,
@@ -85,4 +85,4 @@ exports.createReview = async (req, res, next) => {
     }
 };
 
-exports.createRatingFromReservation = createRatingFromReservation;
+exports.createReviewFromReservation = createReviewFromReservation;

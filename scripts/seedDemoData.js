@@ -7,7 +7,7 @@ const connectDB = require('../config/db');
 const User = require('../models/User');
 const Massage = require('../models/Massage');
 const Reservation = require('../models/Reservation');
-const Rating = require('../models/Rating');
+const Review = require('../models/Review');
 const {
     createMassageData,
     createReservationData,
@@ -44,7 +44,7 @@ const parseConfig = () => ({
 });
 
 const clearCollections = async () => {
-    await Rating.deleteMany({});
+    await Review.deleteMany({});
     await Reservation.deleteMany({});
     await Massage.deleteMany({});
     await User.deleteMany({});
@@ -93,11 +93,11 @@ const generateDemoData = async (config) => {
     }
 
     if (reviewDocs.length > 0) {
-        await Rating.insertMany(reviewDocs, { ordered: true });
+        await Review.insertMany(reviewDocs, { ordered: true });
 
         const uniqueMassageIds = [...new Set(reviewDocs.map((review) => review.massage.toString()))];
         for (const massageId of uniqueMassageIds) {
-            await Rating.getAverageRating(massageId);
+            await Review.getAverageRating(massageId);
         }
     }
 
