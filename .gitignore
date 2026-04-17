@@ -10,3 +10,6 @@ tests/nginx.conf
 
 #ignore tests
 tests/*
+
+.env*
+!.env.example
