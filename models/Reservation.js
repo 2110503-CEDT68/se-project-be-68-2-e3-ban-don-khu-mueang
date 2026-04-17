@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+require('./Review');
 
 const ReservationSchema = new mongoose.Schema({
     reserveDate: {
@@ -15,18 +16,28 @@ const ReservationSchema = new mongoose.Schema({
         ref: 'Massage',
         required: true
     },
-    rating: {
-        type: Number,
-        min: [1, 'Rating must be at least 1'],
-        max: [5, 'Rating cannot exceed 5'],
-        validate: {
-            validator: Number.isInteger,
-            message: 'Rating must be a whole number'
+    discount: [
+        {
+            name: {
+                type: String,
+                required: true
+            },
+            amount: {
+                type: Number,
+                required: true,
+                min: 0
+            }
         }
+    ],
+    price: {
+        type: Number,
+        required: true,
+        min: 0
     },
-    isRated: {
-        type: Boolean,
-        default: false
+    netPrice: {
+        type: Number,
+        required: true,
+        min: 0
     },
     createdAt: {
         type: Date,
@@ -34,48 +45,8 @@ const ReservationSchema = new mongoose.Schema({
     }
 });
 
-ReservationSchema.statics.getAverageRating = async function (massageId) {
-    try {
-        const obj = await this.aggregate([
-            {
-                $match: { massage: massageId, isRated: true }
-            },
-            {
-                $group: {
-                    _id: '$massage',
-                    ratingSum: { $sum: '$rating' },
-                    userRatingCount: { $sum: 1 },
-                    averageRating: { $avg: '$rating' }
-                }
-            }
-        ]);
-
-        if (obj.length > 0) {
-            await this.model('Massage').findByIdAndUpdate(massageId, {
-                ratingSum: obj[0].ratingSum,
-                userRatingCount: obj[0].userRatingCount,
-                averageRating: obj[0].averageRating
-            });
-        } else {
-            await this.model('Massage').findByIdAndUpdate(massageId, {
-                ratingSum: 0,
-                userRatingCount: 0,
-                averageRating: 0
-            });
-        }
-    } catch (err) {
-        console.error(err);
-    }
-};
-
-ReservationSchema.post('save', async function () {
-    if (this.isRated || this.isModified('rating')) {
-        await this.constructor.getAverageRating(this.massage);
-    }
-});
-
 ReservationSchema.post('deleteOne', { document: true, query: false }, async function () {
-    await this.constructor.getAverageRating(this.massage);
+    await this.model('Review').deleteOne({ reservation: this._id });
 });
 
 module.exports = mongoose.model('Reservation', ReservationSchema);
