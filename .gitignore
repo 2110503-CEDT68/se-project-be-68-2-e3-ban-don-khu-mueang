@@ -13,3 +13,6 @@ tests/*
 
 .env*
 !.env.example
+
+out/
+resource/
