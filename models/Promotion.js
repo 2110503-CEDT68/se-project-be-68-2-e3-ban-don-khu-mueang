@@ -37,6 +37,7 @@ const PromotionSchema = new mongoose.Schema({
         },
         minReservations: {
             type: Number,
+            default: 0,
             min: [0, 'Minimum reservations must be at least 0'],
             validate: {
                 validator: function (value) {
