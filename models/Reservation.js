@@ -29,6 +29,11 @@ const ReservationSchema = new mongoose.Schema({
             }
         }
     ],
+    price: {
+        type: Number,
+        required: true,
+        min: 0
+    },
     netPrice: {
         type: Number,
         required: true,
