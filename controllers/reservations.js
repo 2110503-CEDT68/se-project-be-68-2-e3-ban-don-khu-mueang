@@ -1,5 +1,6 @@
 const Reservation = require('../models/Reservation');
 const Massage = require('../models/Massage');
+const { createReviewFromReservation } = require('./reviews');
 
 //@desc     Get all reservations
 //@route    GET /api/reservations
@@ -199,10 +200,10 @@ exports.deleteReservation = async (req, res, next) => {
     }
 };
 
-//@desc     Rate a reservation
-//@route    PATCH /api/reservations/:id/rate
+//@desc     Review a reservation
+//@route    PATCH /api/reservations/:id/review
 //@access   Private (owner only)
-exports.rateReservation = async (req, res, next) => {
+const reviewReservation = async (req, res, next) => {
     try {
         const reservation = await Reservation.findById(req.params.id);
 
@@ -215,27 +216,25 @@ exports.rateReservation = async (req, res, next) => {
             return res.status(401).json({ success: false, message: `User ${req.user.id} is not authorized to rate this reservation` });
         }
 
-        // Prevent double-rating
-        if (reservation.isRated) {
-            return res.status(400).json({ success: false, message: 'You have already rated this reservation' });
-        }
+        const { rating: ratingValue, comment } = req.body;
 
-        const { rating } = req.body;
-
-        if (!rating || !Number.isInteger(Number(rating)) || Number(rating) < 1 || Number(rating) > 5) {
+        if (!ratingValue || !Number.isInteger(Number(ratingValue)) || Number(ratingValue) < 1 || Number(ratingValue) > 5) {
             return res.status(400).json({ success: false, message: 'Please provide a whole number rating between 1 and 5' });
         }
 
-        const intRating = Number(rating);
+        const createdReview = await createReviewFromReservation({
+            reservation,
+            userId: req.user.id,
+            ratingValue,
+            comment
+        });
 
-        // Update the reservation (stats logic is handled via Mongoose post hooks)
-        reservation.rating = intRating;
-        reservation.isRated = true;
-        await reservation.save();
-
-        res.status(200).json({ success: true, data: reservation });
+        res.status(200).json({ success: true, data: createdReview });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ success: false, message: 'Cannot rate reservation' });
+        return res.status(500).json({ success: false, message: 'Cannot review reservation' });
     }
 };
+
+exports.reviewReservation = reviewReservation;
+exports.rateReservation = reviewReservation;

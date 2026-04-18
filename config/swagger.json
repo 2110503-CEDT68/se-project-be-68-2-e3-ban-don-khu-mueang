@@ -188,16 +188,6 @@
             "type": "string",
             "example": "64a1f2b3c4d5e6f7a8b9c0d2"
           },
-          "rating": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 5,
-            "example": 4
-          },
-          "isRated": {
-            "type": "boolean",
-            "example": false
-          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -231,6 +221,69 @@
             "type": "string",
             "format": "date-time",
             "example": "2026-03-20T14:00:00.000Z"
+          }
+        }
+      },
+      "ReviewInput": {
+        "type": "object",
+        "required": [
+          "reservation",
+          "rating"
+        ],
+        "properties": {
+          "reservation": {
+            "type": "string",
+            "description": "Reservation ID",
+            "example": "64a1f2b3c4d5e6f7a8b9c0d3"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 5
+          },
+          "comment": {
+            "type": "string",
+            "example": "Great service and relaxing atmosphere"
+          }
+        }
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "64a1f2b3c4d5e6f7a8b9c0d4"
+          },
+          "reservation": {
+            "type": "string",
+            "example": "64a1f2b3c4d5e6f7a8b9c0d3"
+          },
+          "user": {
+            "type": "string",
+            "example": "64a1f2b3c4d5e6f7a8b9c0d1"
+          },
+          "massage": {
+            "type": "string",
+            "example": "64a1f2b3c4d5e6f7a8b9c0d2"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "example": 4
+          },
+          "comment": {
+            "type": "string",
+            "example": "Great service and relaxing atmosphere"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       }
@@ -1161,7 +1214,7 @@
     },
     "/api/reservations/{id}/rate": {
       "patch": {
-        "summary": "Rate a reservation (owner only, integer 1–5, one-time)",
+        "summary": "Create a review for a reservation (owner only, integer 1–5, one-time)",
         "tags": [
           "Reservations"
         ],
@@ -1196,6 +1249,10 @@
                     "minimum": 1,
                     "maximum": 5,
                     "example": 4
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Great service and relaxing atmosphere"
                   }
                 }
               }
@@ -1204,7 +1261,7 @@
         },
         "responses": {
           "200": {
-            "description": "Reservation rated successfully",
+            "description": "Review created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -1214,7 +1271,7 @@
                       "type": "boolean"
                     },
                     "data": {
-                      "$ref": "#/components/schemas/Reservation"
+                      "$ref": "#/components/schemas/Review"
                     }
                   }
                 }
@@ -1222,7 +1279,7 @@
             }
           },
           "400": {
-            "description": "Invalid rating value or reservation already rated"
+            "description": "Invalid rating value or reservation already reviewed"
           },
           "401": {
             "description": "Unauthorized - Not the reservation owner"
@@ -1232,6 +1289,168 @@
           },
           "500": {
             "description": "Cannot rate reservation"
+          }
+        }
+      }
+    },
+    "/api/reviews": {
+      "post": {
+        "summary": "Create a review for a reservation",
+        "tags": [
+          "Reviews"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Review"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid rating value, missing reservation ID, or reservation already reviewed"
+          },
+          "401": {
+            "description": "Unauthorized - Not the reservation owner"
+          },
+          "404": {
+            "description": "Reservation not found"
+          },
+          "500": {
+            "description": "Cannot create review"
+          }
+        }
+      }
+    },
+    "/api/reviews/me": {
+      "get": {
+        "summary": "Get all reviews created by the logged-in user",
+        "tags": [
+          "Reviews"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of my reviews",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Review"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Not logged in"
+          },
+          "500": {
+            "description": "Cannot get user reviews"
+          }
+        }
+      }
+    },
+    "/api/reviews/me/reservation/{reservationId}": {
+      "get": {
+        "summary": "Get my review(s) by reservation ID for past reservations",
+        "tags": [
+          "Reviews"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reservationId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Reservation ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "My review(s) for the reservation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Review"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid reservation ID or reservation is not in the past yet"
+          },
+          "401": {
+            "description": "Unauthorized - Not the reservation owner"
+          },
+          "404": {
+            "description": "Reservation not found"
+          },
+          "500": {
+            "description": "Cannot get user reviews by reservation ID"
           }
         }
       }
@@ -1560,7 +1779,7 @@
     },
     "/api/massages/{massageId}/reservations/{id}/rate": {
       "patch": {
-        "summary": "Rate a reservation under a specific massage shop (owner only, integer 1–5, one-time)",
+        "summary": "Create a review under a specific massage shop (owner only, integer 1–5, one-time)",
         "tags": [
           "Reservations"
         ],
@@ -1604,6 +1823,10 @@
                     "minimum": 1,
                     "maximum": 5,
                     "example": 4
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Great service and relaxing atmosphere"
                   }
                 }
               }
@@ -1612,7 +1835,7 @@
         },
         "responses": {
           "200": {
-            "description": "Reservation rated successfully",
+            "description": "Review created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -1622,7 +1845,7 @@
                       "type": "boolean"
                     },
                     "data": {
-                      "$ref": "#/components/schemas/Reservation"
+                      "$ref": "#/components/schemas/Review"
                     }
                   }
                 }
@@ -1630,7 +1853,7 @@
             }
           },
           "400": {
-            "description": "Invalid rating value or reservation already rated"
+            "description": "Invalid rating value or reservation already reviewed"
           },
           "401": {
             "description": "Unauthorized - Not the reservation owner"
