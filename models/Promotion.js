@@ -30,6 +30,23 @@ const PromotionSchema = new mongoose.Schema({
         type: Boolean,
         default: true,
     },
+    conditions: {
+        enabled: {
+            type: Boolean,
+            default: false,
+        },
+        minReservations: {
+            type: Number,
+            default: 0,
+            min: [0, 'Minimum reservations must be at least 0'],
+            validate: {
+                validator: function (value) {
+                    return !this.conditions.enabled || value > 0;
+                },
+                message: 'Minimum reservations must be greater than 0 when conditions are enabled',
+            }
+        },
+    },
     createdAt: {
         type: Date,
         default: Date.now,
