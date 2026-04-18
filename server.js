@@ -2,17 +2,19 @@
 const dns = require('node:dns');
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
+process.env.TZ = "Asia/Bangkok";
+
 const express = require("express");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
 const connectDB = require("./config/db");
 
 //Security middleware
-const expressMongoSanitize = require("@exortek/express-mongo-sanitize");
+// const expressMongoSanitize = require("@exortek/express-mongo-sanitize");
 const helmet = require("helmet");
 // const { xss } = require("express-xss-sanitizer");
-const limiter = require("./middleware/rateLimiter");
-const hpp = require("hpp");
+// const limiter = require("./middleware/rateLimiter");
+// const hpp = require("hpp");
 const cors = require("cors");
 
 const swaggerUi = require("swagger-ui-express");
@@ -28,6 +30,7 @@ connectDB();
 const healthRoutes = require("./routes/health");
 const authRoutes = require("./routes/auth");
 const reservations = require("./routes/reservations");
+const reviews = require('./routes/reviews');
 const massages = require('./routes/massages');
 const users = require('./routes/users');
 
@@ -48,7 +51,7 @@ app.use(express.urlencoded({ extended: true }));
 // app.use(xss());
 
 //Rate limiting
-app.use(limiter);
+// app.use(limiter);
 
 //Prevent parameter pollution
 // app.use(hpp());
@@ -66,6 +69,7 @@ app.use(cookieParser());
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/reservations", reservations);
+app.use('/api/reviews', reviews);
 app.use('/api/massages', massages);
 app.use('/api/massages/:massageId/reservations', reservations);
 app.use('/api/users', users);
