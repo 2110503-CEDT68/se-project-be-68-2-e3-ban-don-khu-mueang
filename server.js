@@ -1,6 +1,6 @@
 //if mongo connection error, change dns.setServers to use local dns
-//const dns = require('node:dns');
-//dns.setServers(['8.8.8.8', '1.1.1.1']);
+const dns = require('node:dns');
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 const express = require("express");
 const dotenv = require("dotenv");
@@ -30,6 +30,7 @@ const authRoutes = require("./routes/auth");
 const reservations = require("./routes/reservations");
 const massages = require('./routes/massages');
 const users = require('./routes/users');
+const reviews = require('./routes/review');
 
 const app = express();
 
@@ -68,6 +69,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/reservations", reservations);
 app.use('/api/massages', massages);
 app.use('/api/massages/:massageId/reservations', reservations);
+app.use('/api/reviews', reviews);
 app.use('/api/users', users);
 // Global 404 and 500 error handlers
 app.use((req, res, next) => {
