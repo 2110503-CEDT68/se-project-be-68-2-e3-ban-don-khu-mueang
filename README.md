@@ -1,10 +1,12 @@
+[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/5TpXTvuY)  
+  
 # Massage Booking API
 
 Express and MongoDB API for managing users, massages, reservations, and reviews.
 
 ## Setup
 
-Install dependencies, create a `.env` file with `MONGO_URI`, `JWT_SECRET`, and `JWT_EXPIRE`, then run:
+Install dependencies, rename `.env.example` to `.env` and fill out mongo connection string, then run:  
 
 ```bash
 npm run dev

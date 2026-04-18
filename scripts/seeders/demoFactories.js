@@ -5,8 +5,28 @@ const buildPhoneNumber = (index) => {
 
 const buildPostalCode = (index) => String(10000 + index).slice(0, 5);
 
-const createUserData = (faker, index, role = 'user') => {
+const createUserData = (faker, index, role = 'user', defaultAdmin = false, defaultUser = false) => {
     const suffix = `${Date.now()}-${index}`;
+
+    if (defaultAdmin) {
+        return {
+            name: 'Admin User',
+            tel: buildPhoneNumber(1),
+            email: 'admin@example.com',
+            password: 'password',
+            role: 'admin',
+        };
+    }
+
+    if (defaultUser) {
+        return {
+            name: 'Default User',
+            tel: buildPhoneNumber(2),
+            email: 'user@example.com',
+            password: 'password',
+            role: 'user',
+        };
+    }
 
     return {
         name: faker.person.fullName(),

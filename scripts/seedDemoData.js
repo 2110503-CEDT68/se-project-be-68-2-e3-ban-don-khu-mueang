@@ -61,6 +61,9 @@ const generateDemoData = async (config) => {
     for (let index = 0; index < config.users; index += 1) {
         users.push(createUserData(faker, index, 'user'));
     }
+    //push default admin user with "admin@example.com" email and "password" password
+    users.push(createUserData(faker, config.users + config.admins, 'admin', true, false));
+    users.push(createUserData(faker, config.users + config.admins + 1, 'user', false, true));
 
     for (let index = 0; index < config.admins; index += 1) {
         users.push(createUserData(faker, config.users + index, 'admin'));
