@@ -217,7 +217,7 @@ exports.getMyReviewsByReservationId = async (req, res, next) => {
 // @access  Private
 exports.deleteReview = async (req, res, next) => {
     try {
-        const reviewId = req.params.id; // Now this expects the REVIEW ID
+        const reviewId = req.params.id;
 
         if (!mongoose.Types.ObjectId.isValid(reviewId)) {
             return res.status(400).json({ success: false, message: 'Please provide a valid Review ID' });
@@ -229,8 +229,9 @@ exports.deleteReview = async (req, res, next) => {
             return res.status(404).json({ success: false, message: 'No review found with this ID' });
         }
 
-        // Authorization: Ensure the review belongs to the logged-in user
-        if (review.user.toString() !== req.user.id) {
+        // Authorization: Ensure the review belongs to the logged-in user OR the user is an admin
+        // Notice the added `&& req.user.role !== 'admin'`
+        if (review.user.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(401).json({ success: false, message: 'Not authorized to delete this review' });
         }
 
