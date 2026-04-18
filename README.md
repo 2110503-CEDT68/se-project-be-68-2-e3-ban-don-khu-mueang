@@ -22,18 +22,6 @@ Run the default seed:
 npm run seed-demo
 ```
 
-Generate a larger dataset without clearing existing records:
-
-```bash
-npm run generate-data
-```
-
-Clear the collections first, then generate the dataset:
-
-```bash
-npm run generate-data-clear
-```
-
 Supported flags for `node scripts/seedDemoData.js`:
 
 ```bash

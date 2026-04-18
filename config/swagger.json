@@ -1348,6 +1348,113 @@
         }
       }
     },
+    "/api/reviews/me": {
+      "get": {
+        "summary": "Get all reviews created by the logged-in user",
+        "tags": [
+          "Reviews"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of my reviews",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Review"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Not logged in"
+          },
+          "500": {
+            "description": "Cannot get user reviews"
+          }
+        }
+      }
+    },
+    "/api/reviews/me/reservation/{reservationId}": {
+      "get": {
+        "summary": "Get my review(s) by reservation ID for past reservations",
+        "tags": [
+          "Reviews"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reservationId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Reservation ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "My review(s) for the reservation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Review"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid reservation ID or reservation is not in the past yet"
+          },
+          "401": {
+            "description": "Unauthorized - Not the reservation owner"
+          },
+          "404": {
+            "description": "Reservation not found"
+          },
+          "500": {
+            "description": "Cannot get user reviews by reservation ID"
+          }
+        }
+      }
+    },
     "/api/massages/{massageId}/reservations": {
       "get": {
         "summary": "Get all reservations for a specific massage shop (Admin: all; User: own)",
