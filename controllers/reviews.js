@@ -138,6 +138,33 @@ exports.getMyReviews = async (req, res, next) => {
     }
 };
 
+// @desc    Get all reviews (Admin only)
+// @route   GET /api/reviews
+// @access  Private/Admin
+exports.getReviews = async (req, res, next) => {
+    try {
+        // Notice we don't pass a filter into .find() so it gets everything
+        const reviews = await Review.find()
+            // Admin needs to see WHO wrote the review
+            .populate({ path: 'user', select: 'name email' }) 
+            .populate({ path: 'reservation', select: 'reserveDate createdAt' })
+            .populate({ path: 'massage', select: 'name province' })
+            .sort('-createdAt');
+
+        return res.status(200).json({
+            success: true,
+            count: reviews.length,
+            data: reviews,
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: 'Cannot get all reviews',
+        });
+    }
+};
+
 // @desc    Get the logged-in user's review(s) by reservation ID (past reservations only)
 // @route   GET /api/reviews/me/reservation/:reservationId
 // @access  Private
@@ -190,21 +217,21 @@ exports.getMyReviewsByReservationId = async (req, res, next) => {
 // @access  Private
 exports.deleteReview = async (req, res, next) => {
     try {
-        const idFromFrontend = req.params.id; // This is likely your Reservation ID
+        const reviewId = req.params.id; // Now this expects the REVIEW ID
 
-        if (!mongoose.Types.ObjectId.isValid(idFromFrontend)) {
-            return res.status(400).json({ success: false, message: 'Please provide a valid ID' });
+        if (!mongoose.Types.ObjectId.isValid(reviewId)) {
+            return res.status(400).json({ success: false, message: 'Please provide a valid Review ID' });
         }
 
-        // CHANGE THIS: Find the review where the 'reservation' field matches the ID, 
-        // AND ensure it belongs to the logged-in user.
-        const review = await Review.findOne({ 
-            reservation: idFromFrontend,
-            user: req.user.id 
-        });
+        const review = await Review.findById(reviewId);
 
         if (!review) {
-            return res.status(404).json({ success: false, message: `No review found for this reservation` });
+            return res.status(404).json({ success: false, message: 'No review found with this ID' });
+        }
+
+        // Authorization: Ensure the review belongs to the logged-in user
+        if (review.user.toString() !== req.user.id) {
+            return res.status(401).json({ success: false, message: 'Not authorized to delete this review' });
         }
 
         await review.deleteOne();
