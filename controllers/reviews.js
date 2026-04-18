@@ -84,7 +84,36 @@ exports.createReview = async (req, res, next) => {
         });
     }
 };
+// @desc    Update a review
+// @route   PUT /api/reviews/:id  (where :id is the reservation ID)
+// @access  Private
+exports.updateReview = async (req, res, next) => {
+    try {
+        const reservationId = req.params.id;
+        const { rating, comment } = req.body;
 
+        // Find the review belonging to this user for this reservation
+        let review = await Review.findOne({ 
+            reservation: reservationId, 
+            user: req.user.id 
+        });
+
+        if (!review) {
+            return res.status(404).json({ success: false, message: 'Review not found for this reservation' });
+        }
+
+        // Update fields
+        if (rating) review.rating = Number(rating);
+        if (comment !== undefined) review.comment = comment.trim();
+
+        await review.save();
+
+        res.status(200).json({ success: true, data: review });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, message: 'Cannot update review' });
+    }
+};
 // @desc    Get all reviews created by the logged-in user
 // @route   GET /api/reviews/me
 // @access  Private
@@ -156,4 +185,36 @@ exports.getMyReviewsByReservationId = async (req, res, next) => {
     }
 };
 
+// @desc    Delete a review
+// @route   DELETE /api/reviews/:id
+// @access  Private
+exports.deleteReview = async (req, res, next) => {
+    try {
+        const idFromFrontend = req.params.id; // This is likely your Reservation ID
+
+        if (!mongoose.Types.ObjectId.isValid(idFromFrontend)) {
+            return res.status(400).json({ success: false, message: 'Please provide a valid ID' });
+        }
+
+        // CHANGE THIS: Find the review where the 'reservation' field matches the ID, 
+        // AND ensure it belongs to the logged-in user.
+        const review = await Review.findOne({ 
+            reservation: idFromFrontend,
+            user: req.user.id 
+        });
+
+        if (!review) {
+            return res.status(404).json({ success: false, message: `No review found for this reservation` });
+        }
+
+        await review.deleteOne();
+
+        res.status(200).json({ success: true, data: {} });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ success: false, message: 'Cannot delete review' });
+    }
+};
+
 exports.createReviewFromReservation = createReviewFromReservation;
+
