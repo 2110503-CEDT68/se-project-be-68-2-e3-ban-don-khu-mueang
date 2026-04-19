@@ -6,11 +6,17 @@ env:
 on:
   push:
     branches: [main]
-  pull_request: # This makes it show up as a check in your PRs
+  pull_request:
+    branches: [main] # Only run checks for PRs targeting main
 
 jobs:
   Deploy:
     runs-on: ubuntu-latest
+    # This prevents multiple builds from running on the same PR if you push rapidly
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
     steps:
       - uses: actions/checkout@v4
 
@@ -18,7 +24,6 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        # Pulls 'production' settings only for main branch, else 'preview'
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
             vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
@@ -30,18 +35,24 @@ jobs:
         id: deploy
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
-            # PRODUCTION DEPLOY
             vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
             URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
           else
-            # PREVIEW DEPLOY (Safe for PRs)
             vercel build --token=${{ secrets.VERCEL_TOKEN }}
             URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
           fi
           echo "vercel_url=$URL" >> $GITHUB_OUTPUT
 
-      - name: Create Summary
-        run: |
-          echo "### Deployment Complete 🚀" >> $GITHUB_STEP_SUMMARY
-          echo "Environment: ${{ github.event_name == 'push' && 'Production' || 'Preview' }}" >> $GITHUB_STEP_SUMMARY
-          echo "URL: ${{ steps.deploy.outputs.vercel_url }}" >> $GITHUB_STEP_SUMMARY
+      # This posts the Preview URL directly into the PR conversation
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            ### Preview Deployment Ready! 🚀
+            
+            | Item | Details |
+            | :--- | :--- |
+            | **Status** | ✅ Success |
+            | **Preview URL** | [${{ steps.deploy.outputs.vercel_url }}](${{ steps.deploy.outputs.vercel_url }}) |
+            | **Environment** | Preview |
