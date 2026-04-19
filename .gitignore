@@ -16,3 +16,6 @@ tests/*
 
 out/
 resource/
+
+pnpm-lock.yaml
+pnpm-workspace.yaml
