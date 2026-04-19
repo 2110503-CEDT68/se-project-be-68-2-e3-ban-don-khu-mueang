@@ -116,7 +116,7 @@ exports.getReviews = async (req, res, next) => {
     // We intentionally avoid populating massage to keep it as an ID string matching frontend TS Interface
     query = Review.find(dbQuery).populate({
         path: 'user',
-        select: 'name'
+        select: 'name email'
     });
 
     // Select Fields
@@ -243,6 +243,8 @@ exports.getAdminReviews = async (req, res, next) => {  // <--- RENAME THIS
             .populate({ path: 'massage', select: 'name province' })
             .sort('-createdAt');
 
+        console.log(reviews)
+
         return res.status(200).json({ success: true, count: reviews.length, data: reviews });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Cannot get all reviews' });
@@ -334,7 +336,7 @@ exports.deleteReview = async (req, res, next) => {
 exports.getReview = async (req, res, next) => {
     try {
         const review = await Review.findById(req.params.id)
-            .populate({ path: 'user', select: 'name' })
+            .populate({ path: 'user', select: 'name email' })
             .populate({ path: 'massage', select: 'name province' });
 
         if (!review) {
