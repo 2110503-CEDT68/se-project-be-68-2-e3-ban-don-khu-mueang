@@ -1,4 +1,4 @@
-name: Vercel Production Deployment
+name: Vercel Deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -7,12 +7,14 @@ on:
   push:
     branches:
       - main
+  pull_request: # This enables the check on all PRs targeting any branch
 
 jobs:
-  Deploy-Production:
+  Deploy:
     runs-on: ubuntu-latest
+    # Set environment dynamically based on the event
     environment:
-      name: Production
+      name: ${{ github.event_name == 'push' && 'Production' || 'Preview' }}
       url: ${{ steps.deploy.outputs.vercel_url }}
 
     steps:
@@ -22,19 +24,36 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        # Use 'preview' for PRs and 'production' for pushes to main
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          fi
 
       - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        # Only use the --prod flag on actual pushes to main
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          fi
 
       - name: Deploy to Vercel
         id: deploy
+        # Only use the --prod flag on actual pushes to main
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          else
+            DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          fi
           echo "vercel_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
 
       - name: Create Deployment Summary
         run: |
-          echo "## Production Deployment 🚀" >> $GITHUB_STEP_SUMMARY
-          echo "✅ **Status:** Live" >> $GITHUB_STEP_SUMMARY
-          echo "🔗 **Unique URL:** [${{ steps.deploy.outputs.vercel_url }}](${{ steps.deploy.outputs.vercel_url }})" >> $GITHUB_STEP_SUMMARY
+          echo "## ${{ github.event_name == 'push' && 'Production' || 'Preview' }} Deployment 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Status:** Success" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **URL:** [${{ steps.deploy.outputs.vercel_url }}](${{ steps.deploy.outputs.vercel_url }})" >> $GITHUB_STEP_SUMMARY
