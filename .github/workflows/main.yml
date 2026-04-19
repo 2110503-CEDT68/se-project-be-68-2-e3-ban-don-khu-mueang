@@ -44,15 +44,15 @@ jobs:
           echo "vercel_url=$URL" >> $GITHUB_OUTPUT
 
       # This posts the Preview URL directly into the PR conversation
-      - name: Comment on PR
-        if: github.event_name == 'pull_request'
-        uses: thollander/actions-comment-pull-request@v2
-        with:
-          message: |
-            ### Preview Deployment Ready! 🚀
+      # - name: Comment on PR
+      #   if: github.event_name == 'pull_request'
+      #   uses: thollander/actions-comment-pull-request@v2
+      #   with:
+      #     message: |
+      #       ### Preview Deployment Ready! 🚀
             
-            | Item | Details |
-            | :--- | :--- |
-            | **Status** | ✅ Success |
-            | **Preview URL** | [${{ steps.deploy.outputs.vercel_url }}](${{ steps.deploy.outputs.vercel_url }}) |
-            | **Environment** | Preview |
+      #       | Item | Details |
+      #       | :--- | :--- |
+      #       | **Status** | ✅ Success |
+      #       | **Preview URL** | [${{ steps.deploy.outputs.vercel_url }}](${{ steps.deploy.outputs.vercel_url }}) |
+      #       | **Environment** | Preview |
