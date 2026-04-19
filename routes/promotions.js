@@ -12,7 +12,7 @@ const router = express.Router();
 const { protect, authorize } = require('../middleware/auth');
 
 router.route('/')
-    .get(protect, authorize('admin'), getPromotions)
+    .get(getPromotions) // Removed protection so it is now public
     .post(protect, authorize('admin'), createPromotion);
 
 router.route('/:id')
