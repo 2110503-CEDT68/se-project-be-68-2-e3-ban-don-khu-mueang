@@ -5,6 +5,7 @@ setBangkokTimezone();
 const dns = require('node:dns');
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
+
 const express = require("express");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
@@ -34,6 +35,7 @@ const reservations = require("./routes/reservations");
 const reviews = require('./routes/reviews');
 const massages = require('./routes/massages');
 const users = require('./routes/users');
+const promotions = require('./routes/promotions');
 
 const app = express();
 
@@ -74,6 +76,7 @@ app.use('/api/reviews', reviews);
 app.use('/api/massages', massages);
 app.use('/api/massages/:massageId/reservations', reservations);
 app.use('/api/users', users);
+app.use('/api/promotions', promotions);
 // Global 404 and 500 error handlers
 app.use((req, res, next) => {
     res.status(404).json({

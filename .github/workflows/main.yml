@@ -1,19 +1,21 @@
-name: Vercel Production Deployment
+name: Vercel Deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  pull_request:
+    branches: [main] # Only run checks for PRs targeting main
 
 jobs:
-  Deploy-Production:
+  Deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: Production
-      url: ${{ steps.deploy.outputs.vercel_url }}
+    # This prevents multiple builds from running on the same PR if you push rapidly
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
       - uses: actions/checkout@v4
@@ -22,19 +24,35 @@ jobs:
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          fi
 
-      - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy to Vercel
+      - name: Build & Deploy
         id: deploy
         run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
-          echo "vercel_url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          if [ "${{ github.event_name }}" = "push" ]; then
+            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+            URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          else
+            vercel build --token=${{ secrets.VERCEL_TOKEN }}
+            URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          fi
+          echo "vercel_url=$URL" >> $GITHUB_OUTPUT
 
-      - name: Create Deployment Summary
-        run: |
-          echo "## Production Deployment 🚀" >> $GITHUB_STEP_SUMMARY
-          echo "✅ **Status:** Live" >> $GITHUB_STEP_SUMMARY
-          echo "🔗 **Unique URL:** [${{ steps.deploy.outputs.vercel_url }}](${{ steps.deploy.outputs.vercel_url }})" >> $GITHUB_STEP_SUMMARY
+      # This posts the Preview URL directly into the PR conversation
+      # - name: Comment on PR
+      #   if: github.event_name == 'pull_request'
+      #   uses: thollander/actions-comment-pull-request@v2
+      #   with:
+      #     message: |
+      #       ### Preview Deployment Ready! 🚀
+            
+      #       | Item | Details |
+      #       | :--- | :--- |
+      #       | **Status** | ✅ Success |
+      #       | **Preview URL** | [${{ steps.deploy.outputs.vercel_url }}](${{ steps.deploy.outputs.vercel_url }}) |
+      #       | **Environment** | Preview |
