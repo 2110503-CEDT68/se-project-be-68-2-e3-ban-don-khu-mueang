@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Reservation = require('../models/Reservation');
 const Review = require('../models/Review');
+const { getNow } = require('../config/timezone');
 
 const validateRatingValue = (ratingValue) => {
     return ratingValue !== undefined && Number.isInteger(Number(ratingValue)) && Number(ratingValue) >= 1 && Number(ratingValue) <= 5;
@@ -272,7 +273,7 @@ exports.getMyReviewsByReservationId = async (req, res, next) => {
             return res.status(401).json({ success: false, message: `User ${req.user.id} is not authorized to access this reservation review` });
         }
 
-        if (new Date(reservation.reserveDate).getTime() > Date.now()) {
+        if (new Date(reservation.reserveDate).getTime() > getNow().getTime()) {
             return res.status(400).json({ success: false, message: 'This reservation is not in the past yet' });
         }
 
