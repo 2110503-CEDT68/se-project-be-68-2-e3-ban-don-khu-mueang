@@ -1,6 +1,7 @@
 const Reservation = require('../models/Reservation');
 const Massage = require('../models/Massage');
 const { createReviewFromReservation } = require('./reviews');
+const { parseDateInBangkok, getNow } = require('../config/timezone');
 
 //@desc     Get all reservations
 //@route    GET /api/reservations
@@ -93,9 +94,10 @@ exports.addReservation = async (req, res, next) => {
         const massageId = req.params.massageId || req.body.massage;
         req.body.massage = massageId;
 
-        const parsedDate = new Date(req.body.reserveDate);
-        if (!req.body.reserveDate || isNaN(parsedDate.getTime())) {
-            return res.status(400).json({ success: false, message: 'Please provide a valid reserveDate (ISO 8601 format)' });
+        // Validate and normalise reserveDate before hitting Mongoose
+        const parsedDate = parseDateInBangkok(req.body.reserveDate);
+        if (!parsedDate) {
+            return res.status(400).json({ success: false, message: 'Please provide a valid reserveDate (ISO 8601 format, e.g. 2026-03-05T14:00:00+07:00)' });
         }
         req.body.reserveDate = parsedDate;
 
@@ -107,7 +109,7 @@ exports.addReservation = async (req, res, next) => {
         req.body.user = req.user.id;
         const existReservations = await Reservation.find({ 
             user: req.user.id,
-            reserveDate: { $gte: new Date() }
+            reserveDate: { $gte: getNow() }
         });
 
         if (existReservations.length >= 3 && req.user.role !== 'admin') {
@@ -144,9 +146,9 @@ exports.updateReservation = async (req, res, next) => {
 
         const allowedUpdates = {};
         if (req.body.reserveDate !== undefined) {
-            const parsedDate = new Date(req.body.reserveDate);
-            if (isNaN(parsedDate.getTime())) {
-                return res.status(400).json({ success: false, message: 'Please provide a valid reserveDate' });
+            const parsedDate = parseDateInBangkok(req.body.reserveDate);
+            if (!parsedDate) {
+                return res.status(400).json({ success: false, message: 'Please provide a valid reserveDate (ISO 8601 format, e.g. 2026-03-05T14:00:00+07:00)' });
             }
             allowedUpdates.reserveDate = parsedDate;
         }

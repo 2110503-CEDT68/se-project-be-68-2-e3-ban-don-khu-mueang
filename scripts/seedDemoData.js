@@ -1,6 +1,7 @@
 require('dotenv').config({ path: '.env' });
 
-process.env.TZ = "Asia/Bangkok";
+const { setBangkokTimezone } = require('../config/timezone');
+setBangkokTimezone();
 
 const mongoose = require('mongoose');
 const connectDB = require('../config/db');
