@@ -1,26 +1,36 @@
 const User = require("../models/User");
 const sendTokenResponse = require("../lib/sendTokenResponse");
 
+const TEL_REGEX = /^\d{3}-\d{3}-\d{4}$/;
+const isNonEmptyString = (value) => typeof value === "string" && value.trim() !== "";
+const normalizeString = (value) => value.trim();
+const normalizeEmail = (value) => value.trim().toLowerCase();
+
 //@desc     Login user
 //@route    POST /api/auth/login
 //@access   Public
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
-        if (!email || !password) {
+        if (!isNonEmptyString(email) || !isNonEmptyString(password)) {
             return res.status(400).json({
                 success: false,
                 message: "Error: Please provide both email and password"
             });
         }
-        const user = await User.findOne({ email }).select("+password");
+
+        const normalizedEmail = normalizeEmail(email);
+        const normalizedPassword = normalizeString(password);
+        const loginQuery = { email: normalizedEmail };
+
+        const user = await User.findOne(loginQuery).select("+password");
         if (!user) {
             return res.status(401).json({
                 success: false,
                 message: "Error: Invalid credentials"
             });
         }
-        const isMatch = await user.matchPassword(password);
+        const isMatch = await user.matchPassword(normalizedPassword);
         if (!isMatch) {
             return res.status(401).json({
                 success: false,
@@ -74,18 +84,39 @@ exports.getMe = async (req, res) => {
 exports.register = async (req, res) => {
     const { name, tel, email, password } = req.body;
     try {
-        const telRegex = /^\d{3}-\d{3}-\d{4}$/;
-        if (!telRegex.test(tel)) {
+        if (!isNonEmptyString(name) || !isNonEmptyString(tel) || !isNonEmptyString(email) || !isNonEmptyString(password)) {
+            return res.status(400).json({
+                success: false,
+                message: "Error: name, tel, email and password must be non-empty strings"
+            });
+        }
+
+        const normalizedName = normalizeString(name);
+        const normalizedTel = normalizeString(tel);
+        const normalizedEmail = normalizeEmail(email);
+        const normalizedPassword = normalizeString(password);
+
+        if (!TEL_REGEX.test(normalizedTel)) {
             return res.status(400).json({
                 success: false,
                 message: "Error: Telephone number must be in the format xxx-xxx-xxxx"
             });
         }
-        const existingUser = await User.findOne({ email });
+
+        const existingUserQuery = { email: normalizedEmail };
+        const existingUser = await User.findOne(existingUserQuery);
         if (existingUser) {
             return res.status(400).json({ success: false, message: "Error: Email already in use" });
         }
-        const user = await User.create({ name, tel, email, password });
+
+        const createPayload = {
+            name: normalizedName,
+            tel: normalizedTel,
+            email: normalizedEmail,
+            password: normalizedPassword
+        };
+
+        const user = await User.create(createPayload);
         sendTokenResponse(user, 201, res);
     } catch (error) {
         console.error(error);
@@ -102,7 +133,40 @@ exports.register = async (req, res) => {
 exports.registerAdmin = async (req, res) => {
     const { name, tel, email, password } = req.body;
     try {
-        const user = await User.create({ name, tel, email, password, role: "admin" });
+        if (!isNonEmptyString(name) || !isNonEmptyString(tel) || !isNonEmptyString(email) || !isNonEmptyString(password)) {
+            return res.status(400).json({
+                success: false,
+                message: "Error: name, tel, email and password must be non-empty strings"
+            });
+        }
+
+        const normalizedName = normalizeString(name);
+        const normalizedTel = normalizeString(tel);
+        const normalizedEmail = normalizeEmail(email);
+        const normalizedPassword = normalizeString(password);
+
+        if (!TEL_REGEX.test(normalizedTel)) {
+            return res.status(400).json({
+                success: false,
+                message: "Error: Telephone number must be in the format xxx-xxx-xxxx"
+            });
+        }
+
+        const existingUserQuery = { email: normalizedEmail };
+        const existingUser = await User.findOne(existingUserQuery);
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: "Error: Email already in use" });
+        }
+
+        const createPayload = {
+            name: normalizedName,
+            tel: normalizedTel,
+            email: normalizedEmail,
+            password: normalizedPassword,
+            role: "admin"
+        };
+
+        const user = await User.create(createPayload);
         sendTokenResponse(user, 201, res);
     } catch (error) {
         console.error(error);
