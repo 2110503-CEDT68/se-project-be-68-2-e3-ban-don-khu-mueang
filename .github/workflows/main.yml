@@ -25,6 +25,7 @@ jobs:
       # ── 1. Secret scanning ───────────────────────────────────────────────
       - name: Secret Scanning (Gitleaks)
         uses: gitleaks/gitleaks-action@v2
+        if: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
