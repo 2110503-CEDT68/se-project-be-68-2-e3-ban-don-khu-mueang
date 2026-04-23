@@ -166,6 +166,7 @@ exports.finalizeUpload = async (req, res, next) => {
     try {
         const { target, key, massageId } = req.body || {};
         const userId = normalizeId(req.user && req.user.id);
+        const normalizedKey = typeof key === "string" ? key.trim() : "";
 
         if (!isValidObjectId(userId)) {
             return res.status(401).json({
@@ -181,7 +182,7 @@ exports.finalizeUpload = async (req, res, next) => {
             });
         }
 
-        if (!key) {
+        if (!normalizedKey) {
             return res.status(400).json({
                 success: false,
                 message: "key is required"
@@ -198,7 +199,7 @@ exports.finalizeUpload = async (req, res, next) => {
 
         if (target === "avatar") {
             const expectedKey = `avatars/${userId}.jpg`;
-            if (key !== expectedKey) {
+            if (normalizedKey !== expectedKey) {
                 return res.status(400).json({
                     success: false,
                     message: "Invalid avatar key"
@@ -206,10 +207,10 @@ exports.finalizeUpload = async (req, res, next) => {
             }
 
             const avatarVersion = Date.now();
-            const avatarUrl = buildVersionedUrl(buildPublicUrl(key, r2Config), avatarVersion);
+            const avatarUrl = buildVersionedUrl(buildPublicUrl(expectedKey, r2Config), avatarVersion);
             const user = await User.findByIdAndUpdate(
                 userId,
-                { avatarKey: key, avatarUrl },
+                { avatarKey: expectedKey, avatarUrl },
                 { new: true, runValidators: true }
             );
 
@@ -246,7 +247,7 @@ exports.finalizeUpload = async (req, res, next) => {
         }
 
         const expectedPrefix = `massages/${normalizedMassageId}/`;
-        if (!key.startsWith(expectedPrefix)) {
+        if (!normalizedKey.startsWith(expectedPrefix)) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid massage image key"
@@ -261,7 +262,7 @@ exports.finalizeUpload = async (req, res, next) => {
             });
         }
 
-        const pictureUrl = buildPublicUrl(key, r2Config);
+        const pictureUrl = buildPublicUrl(normalizedKey, r2Config);
         const hasRealPictures = (massage.pictures || []).some((picture) => picture !== PLACEHOLDER_IMAGE_URL);
         const nextPictures = hasRealPictures ? [...massage.pictures] : [];
 
