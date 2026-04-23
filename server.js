@@ -2,9 +2,10 @@
 const { setBangkokTimezone } = require('./config/timezone');
 setBangkokTimezone();
 
-const dns = require('node:dns');
-dns.setServers(['8.8.8.8', '1.1.1.1']);
-
+if (process.env.ENABLE_EXTERNAL_DNS === 'true') {
+    const dns = require('node:dns');
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+}
 
 const express = require("express");
 const dotenv = require("dotenv");
@@ -15,7 +16,7 @@ const connectDB = require("./config/db");
 // const expressMongoSanitize = require("@exortek/express-mongo-sanitize");
 const helmet = require("helmet");
 // const { xss } = require("express-xss-sanitizer");
-// const limiter = require("./middleware/rateLimiter");
+const limiter = require("./middleware/rateLimiter");
 // const hpp = require("hpp");
 const cors = require("cors");
 
@@ -56,7 +57,7 @@ app.use(express.urlencoded({ extended: true }));
 // app.use(xss());
 
 //Rate limiting
-// app.use(limiter);
+app.use(limiter);
 
 //Prevent parameter pollution
 // app.use(hpp());
