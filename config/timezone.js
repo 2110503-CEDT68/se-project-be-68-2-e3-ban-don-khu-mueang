@@ -14,7 +14,7 @@ const parseDateInBangkok = (value) => {
     }
 
     if (value instanceof Date) {
-        return Number.isNaN(value.getTime()) ? null : new Date(value.getTime());
+        return Number.isNaN(value.getTime()) ? null : new Date(value);
     }
 
     if (typeof value === 'number') {
