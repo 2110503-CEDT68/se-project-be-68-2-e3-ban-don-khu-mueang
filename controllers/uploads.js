@@ -1,5 +1,6 @@
 const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const mongoose = require("mongoose");
 const User = require("../models/User");
 const Massage = require("../models/Massage");
 
@@ -56,6 +57,8 @@ const buildPublicUrl = (key, r2Config) => {
 };
 
 const buildVersionedUrl = (url, version) => `${url}${url.includes("?") ? "&" : "?"}v=${version}`;
+const normalizeId = (value) => (typeof value === "string" ? value.trim() : "");
+const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 
 // @desc    Generate upload URL for avatar or massage image
 // @route   POST /api/uploads/presigned-url
@@ -63,6 +66,14 @@ const buildVersionedUrl = (url, version) => `${url}${url.includes("?") ? "&" : "
 exports.generateUploadUrl = async (req, res, next) => {
     try {
         const { target, contentType, massageId } = req.body || {};
+        const userId = normalizeId(req.user && req.user.id);
+
+        if (!isValidObjectId(userId)) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized user"
+            });
+        }
 
         if (!ALLOWED_IMAGE_CONTENT_TYPES.includes(contentType)) {
             return res.status(400).json({
@@ -88,7 +99,7 @@ exports.generateUploadUrl = async (req, res, next) => {
 
         let key;
         if (target === "avatar") {
-            key = `avatars/${req.user.id}.jpg`;
+            key = `avatars/${userId}.jpg`;
         } else {
             if (req.user.role !== "admin") {
                 return res.status(403).json({
@@ -97,22 +108,30 @@ exports.generateUploadUrl = async (req, res, next) => {
                 });
             }
 
-            if (!massageId) {
+            const normalizedMassageId = normalizeId(massageId);
+            if (!normalizedMassageId) {
                 return res.status(400).json({
                     success: false,
                     message: "massageId is required for target=massage"
                 });
             }
 
-            const massage = await Massage.findById(massageId);
-            if (!massage) {
-                return res.status(404).json({
+            if (!isValidObjectId(normalizedMassageId)) {
+                return res.status(400).json({
                     success: false,
-                    message: `No massage shop with id ${massageId}`
+                    message: "massageId must be a valid ObjectId"
                 });
             }
 
-            key = `massages/${massageId}/${Date.now()}-${req.user.id}.jpg`;
+            const massage = await Massage.findById(normalizedMassageId);
+            if (!massage) {
+                return res.status(404).json({
+                    success: false,
+                    message: `No massage shop with id ${normalizedMassageId}`
+                });
+            }
+
+            key = `massages/${normalizedMassageId}/${Date.now()}-${userId}.jpg`;
         }
 
         const client = createR2Client(r2Config);
@@ -146,6 +165,14 @@ exports.generateUploadUrl = async (req, res, next) => {
 exports.finalizeUpload = async (req, res, next) => {
     try {
         const { target, key, massageId } = req.body || {};
+        const userId = normalizeId(req.user && req.user.id);
+
+        if (!isValidObjectId(userId)) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized user"
+            });
+        }
 
         if (!["avatar", "massage"].includes(target)) {
             return res.status(400).json({
@@ -170,7 +197,7 @@ exports.finalizeUpload = async (req, res, next) => {
         }
 
         if (target === "avatar") {
-            const expectedKey = `avatars/${req.user.id}.jpg`;
+            const expectedKey = `avatars/${userId}.jpg`;
             if (key !== expectedKey) {
                 return res.status(400).json({
                     success: false,
@@ -181,7 +208,7 @@ exports.finalizeUpload = async (req, res, next) => {
             const avatarVersion = Date.now();
             const avatarUrl = buildVersionedUrl(buildPublicUrl(key, r2Config), avatarVersion);
             const user = await User.findByIdAndUpdate(
-                req.user.id,
+                userId,
                 { avatarKey: key, avatarUrl },
                 { new: true, runValidators: true }
             );
@@ -203,14 +230,22 @@ exports.finalizeUpload = async (req, res, next) => {
             });
         }
 
-        if (!massageId) {
+        const normalizedMassageId = normalizeId(massageId);
+        if (!normalizedMassageId) {
             return res.status(400).json({
                 success: false,
                 message: "massageId is required for target=massage"
             });
         }
 
-        const expectedPrefix = `massages/${massageId}/`;
+        if (!isValidObjectId(normalizedMassageId)) {
+            return res.status(400).json({
+                success: false,
+                message: "massageId must be a valid ObjectId"
+            });
+        }
+
+        const expectedPrefix = `massages/${normalizedMassageId}/`;
         if (!key.startsWith(expectedPrefix)) {
             return res.status(400).json({
                 success: false,
@@ -218,11 +253,11 @@ exports.finalizeUpload = async (req, res, next) => {
             });
         }
 
-        const massage = await Massage.findById(massageId);
+        const massage = await Massage.findById(normalizedMassageId);
         if (!massage) {
             return res.status(404).json({
                 success: false,
-                message: `No massage shop with id ${massageId}`
+                message: `No massage shop with id ${normalizedMassageId}`
             });
         }
 
