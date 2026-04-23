@@ -49,6 +49,16 @@
             ],
             "example": "user"
           },
+          "avatarKey": {
+            "type": "string",
+            "nullable": true,
+            "example": "avatars/64a1f2b3c4d5e6f7a8b9c0d1.jpg"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://example-bucket.r2.dev/avatars/64a1f2b3c4d5e6f7a8b9c0d1.jpg"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -284,6 +294,158 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "UploadTarget": {
+        "type": "string",
+        "enum": [
+          "avatar",
+          "massage"
+        ],
+        "example": "avatar"
+      },
+      "GenerateUploadUrlRequest": {
+        "type": "object",
+        "required": [
+          "target",
+          "contentType"
+        ],
+        "properties": {
+          "target": {
+            "$ref": "#/components/schemas/UploadTarget"
+          },
+          "contentType": {
+            "type": "string",
+            "enum": [
+              "image/jpeg",
+              "image/png"
+            ],
+            "example": "image/jpeg"
+          },
+          "massageId": {
+            "type": "string",
+            "description": "Required when target is massage",
+            "example": "64a1f2b3c4d5e6f7a8b9c0d2"
+          }
+        }
+      },
+      "GenerateUploadUrlResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string",
+                "example": "https://example.r2.cloudflarestorage.com/bucket/avatars/64a1f2b3c4d5e6f7a8b9c0d1.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256"
+              },
+              "key": {
+                "type": "string",
+                "example": "avatars/64a1f2b3c4d5e6f7a8b9c0d1.jpg"
+              },
+              "expiresIn": {
+                "type": "integer",
+                "example": 300
+              },
+              "target": {
+                "$ref": "#/components/schemas/UploadTarget"
+              },
+              "contentType": {
+                "type": "string",
+                "enum": [
+                  "image/jpeg",
+                  "image/png"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "FinalizeUploadRequest": {
+        "type": "object",
+        "required": [
+          "target",
+          "key"
+        ],
+        "properties": {
+          "target": {
+            "$ref": "#/components/schemas/UploadTarget"
+          },
+          "key": {
+            "type": "string",
+            "example": "avatars/64a1f2b3c4d5e6f7a8b9c0d1.jpg"
+          },
+          "massageId": {
+            "type": "string",
+            "description": "Required when target is massage",
+            "example": "64a1f2b3c4d5e6f7a8b9c0d2"
+          }
+        }
+      },
+      "FinalizeAvatarUploadResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "avatarKey": {
+                "type": "string",
+                "example": "avatars/64a1f2b3c4d5e6f7a8b9c0d1.jpg"
+              },
+              "avatarUrl": {
+                "type": "string",
+                "example": "https://example-bucket.r2.dev/avatars/64a1f2b3c4d5e6f7a8b9c0d1.jpg"
+              }
+            }
+          }
+        }
+      },
+      "FinalizeMassageUploadResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "example": "64a1f2b3c4d5e6f7a8b9c0d2"
+              },
+              "pictures": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "example": [
+                  "https://example-bucket.r2.dev/massages/64a1f2b3c4d5e6f7a8b9c0d2/1713696000000-64a1f2b3c4d5e6f7a8b9c0d1.jpg"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "message": {
+            "type": "string",
+            "example": "R2 configuration is missing"
           }
         }
       }
@@ -1863,6 +2025,141 @@
           },
           "500": {
             "description": "Cannot rate reservation"
+          }
+        }
+      }
+    },
+    "/api/uploads/presigned-url": {
+      "post": {
+        "summary": "Generate R2 presigned PUT URL for avatar or massage image",
+        "tags": [
+          "Uploads"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateUploadUrlRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Presigned URL generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateUploadUrlResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid target/contentType/massageId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden for non-admin massage uploads"
+          },
+          "404": {
+            "description": "Massage shop not found"
+          },
+          "500": {
+            "description": "R2 configuration/server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/uploads/finalize": {
+      "post": {
+        "summary": "Finalize uploaded file and persist avatar/massage picture",
+        "tags": [
+          "Uploads"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalizeUploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Upload finalized and record updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/FinalizeAvatarUploadResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/FinalizeMassageUploadResponse"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid key/target/massageId",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden for non-admin massage finalize"
+          },
+          "404": {
+            "description": "Massage shop not found"
+          },
+          "500": {
+            "description": "R2 configuration/server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         }
       }
