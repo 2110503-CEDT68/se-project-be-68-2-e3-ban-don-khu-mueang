@@ -2,21 +2,96 @@ name: Vercel Deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
 on:
   push:
     branches: [main]
   pull_request:
-    branches: [main] # Only run checks for PRs targeting main
+    branches: [main]
 
 jobs:
-  Deploy:
+  security:
+    name: Security Checks
     runs-on: ubuntu-latest
-    # This prevents multiple builds from running on the same PR if you push rapidly
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── 1. Secret scanning ───────────────────────────────────────────────
+      - name: Secret Scanning (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── 2. Dependency + IaC + container vuln scan ────────────────────────
+      - name: Vulnerability Scan (Trivy)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          format: sarif
+          output: trivy.sarif
+
+      - name: Upload Trivy results to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy.sarif
+
+      # ── 3. SAST + quality gate ───────────────────────────────────────────
+      - name: Create SonarCloud properties
+        run: |
+          cat > sonar-project.properties << 'EOF'
+          sonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+          sonar.organization=${{ secrets.SONAR_ORG }}
+          sonar.sources=.
+          sonar.exclusions=node_modules/**,dist/**,.next/**
+          EOF
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  codeql:
+    name: CodeQL (Deep SAST)
+    runs-on: ubuntu-latest
+    needs: security
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      matrix:
+        language: [javascript]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: /language:${{ matrix.language }}
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: codeql
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
-
     steps:
       - uses: actions/checkout@v4
 
@@ -43,14 +118,12 @@ jobs:
           fi
           echo "vercel_url=$URL" >> $GITHUB_OUTPUT
 
-      # This posts the Preview URL directly into the PR conversation
       # - name: Comment on PR
       #   if: github.event_name == 'pull_request'
       #   uses: thollander/actions-comment-pull-request@v2
       #   with:
       #     message: |
       #       ### Preview Deployment Ready! 🚀
-            
       #       | Item | Details |
       #       | :--- | :--- |
       #       | **Status** | ✅ Success |
