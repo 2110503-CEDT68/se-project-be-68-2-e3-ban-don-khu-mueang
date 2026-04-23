@@ -1,6 +1,13 @@
 const User = require("../models/User");
+const { Types } = require("mongoose");
 
 const TEL_REGEX = /^\d{3}-\d{3}-\d{4}$/;
+const VALID_ROLES = new Set(["user", "admin"]);
+
+const isNonEmptyString = (value) => typeof value === "string" && value.trim() !== "";
+const normalizeString = (value) => value.trim();
+const normalizeEmail = (value) => value.trim().toLowerCase();
+const isValidObjectId = (value) => typeof value === "string" && Types.ObjectId.isValid(value);
 
 // @desc    Get all users
 // @route   GET /api/users
@@ -40,10 +47,15 @@ exports.getUsers = async (req, res, next) => {
 // @access  Private (Admin)
 exports.getUser = async (req, res, next) => {
     try {
-        const user = await User.findById(req.params.id);
+        const userId = req.params.id;
+        if (!isValidObjectId(userId)) {
+            return res.status(400).json({ success: false, message: "Invalid user id format" });
+        }
+
+        const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(404).json({ success: false, message: `No user with id ${req.params.id}` });
+            return res.status(404).json({ success: false, message: `No user with id ${userId}` });
         }
 
         res.status(200).json({ success: true, data: user });
@@ -59,20 +71,51 @@ exports.createUser = async (req, res, next) => {
     try {
         const { name, tel, email, password, role } = req.body;
 
+        if (!isNonEmptyString(name) || !isNonEmptyString(tel) || !isNonEmptyString(email) || !isNonEmptyString(password)) {
+            return res.status(400).json({
+                success: false,
+                message: "Error: name, tel, email and password must be non-empty strings"
+            });
+        }
+
+        if (role !== undefined && (!isNonEmptyString(role) || !VALID_ROLES.has(normalizeString(role)))) {
+            return res.status(400).json({
+                success: false,
+                message: "Error: role must be either user or admin"
+            });
+        }
+
+        const normalizedName = normalizeString(name);
+        const normalizedTel = normalizeString(tel);
+        const normalizedEmail = normalizeEmail(email);
+        const normalizedPassword = normalizeString(password);
+        const normalizedRole = role === undefined ? undefined : normalizeString(role);
+
         const telRegex = TEL_REGEX;
-        if (!telRegex.test(tel)) {
+        if (!telRegex.test(normalizedTel)) {
             return res.status(400).json({
                 success: false,
                 message: "Error: Telephone number must be in the format xxx-xxx-xxxx"
             });
         }
 
-        const existingUser = await User.findOne({ email });
+        const existingUserQuery = { email: normalizedEmail };
+        const existingUser = await User.findOne(existingUserQuery);
         if (existingUser) {
             return res.status(400).json({ success: false, message: "Error: Email already in use" });
         }
 
-        const user = await User.create({ name, tel, email, password, role });
+        const createPayload = {
+            name: normalizedName,
+            tel: normalizedTel,
+            email: normalizedEmail,
+            password: normalizedPassword
+        };
+        if (normalizedRole !== undefined) {
+            createPayload.role = normalizedRole;
+        }
+
+        const user = await User.create(createPayload);
 
         res.status(201).json({ success: true, data: user });
     } catch (err) {
@@ -86,32 +129,67 @@ exports.createUser = async (req, res, next) => {
 exports.updateUser = async (req, res, next) => {
     try {
         const { name, tel, email, role, password } = req.body;
+        const userId = req.params.id;
 
-        const user = await User.findById(req.params.id);
-
-        if (!user) {
-            return res.status(404).json({ success: false, message: `No user with id ${req.params.id}` });
+        if (!isValidObjectId(userId)) {
+            return res.status(400).json({ success: false, message: "Invalid user id format" });
         }
 
-        if (name !== undefined) user.name = name;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ success: false, message: `No user with id ${userId}` });
+        }
+
+        if (name !== undefined) {
+            if (!isNonEmptyString(name)) {
+                return res.status(400).json({ success: false, message: "Error: name must be a non-empty string" });
+            }
+            user.name = normalizeString(name);
+        }
+
         if (tel !== undefined) {
-            if (!TEL_REGEX.test(tel)) {
+            if (!isNonEmptyString(tel)) {
+                return res.status(400).json({ success: false, message: "Error: tel must be a non-empty string" });
+            }
+
+            const normalizedTel = normalizeString(tel);
+            if (!TEL_REGEX.test(normalizedTel)) {
                 return res.status(400).json({
                     success: false,
                     message: "Error: Telephone number must be in the format xxx-xxx-xxxx"
                 });
             }
-            user.tel = tel;
+            user.tel = normalizedTel;
         }
+
         if (email !== undefined) {
-            const existingUser = await User.findOne({ email, _id: { $ne: req.params.id } });
+            if (!isNonEmptyString(email)) {
+                return res.status(400).json({ success: false, message: "Error: email must be a non-empty string" });
+            }
+
+            const normalizedEmail = normalizeEmail(email);
+            const existingUserQuery = { email: normalizedEmail, _id: { $ne: userId } };
+            const existingUser = await User.findOne(existingUserQuery);
             if (existingUser) {
                 return res.status(400).json({ success: false, message: "Error: Email already in use" });
             }
-            user.email = email;
+            user.email = normalizedEmail;
         }
-        if (role !== undefined) user.role = role;
-        if (password !== undefined) user.password = password;
+
+        if (role !== undefined) {
+            if (!isNonEmptyString(role) || !VALID_ROLES.has(normalizeString(role))) {
+                return res.status(400).json({ success: false, message: "Error: role must be either user or admin" });
+            }
+            user.role = normalizeString(role);
+        }
+
+        if (password !== undefined) {
+            if (!isNonEmptyString(password)) {
+                return res.status(400).json({ success: false, message: "Error: password must be a non-empty string" });
+            }
+            user.password = normalizeString(password);
+        }
 
         await user.save({ runValidators: true });
 
@@ -126,10 +204,15 @@ exports.updateUser = async (req, res, next) => {
 // @access  Private (Admin)
 exports.deleteUser = async (req, res, next) => {
     try {
-        const user = await User.findById(req.params.id);
+        const userId = req.params.id;
+        if (!isValidObjectId(userId)) {
+            return res.status(400).json({ success: false, message: "Invalid user id format" });
+        }
+
+        const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(404).json({ success: false, message: `No user with id ${req.params.id}` });
+            return res.status(404).json({ success: false, message: `No user with id ${userId}` });
         }
 
         await user.deleteOne();
