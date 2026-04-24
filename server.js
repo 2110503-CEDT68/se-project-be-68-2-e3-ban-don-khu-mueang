@@ -2,10 +2,6 @@
 const { setBangkokTimezone } = require('./config/timezone');
 setBangkokTimezone();
 
-if (process.env.ENABLE_EXTERNAL_DNS === 'true') {
-    const dns = require('node:dns');
-    dns.setServers(['8.8.8.8', '1.1.1.1']);
-}
 
 const express = require("express");
 const dotenv = require("dotenv");
@@ -27,6 +23,13 @@ const swaggerSpec = require("./config/swagger");
 dotenv.config({ path: ".env" });
 
 //Connect to database
+
+
+if (process.env.ENABLE_EXTERNAL_DNS === 'true') {
+    const dns = require('node:dns');
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+}
+
 connectDB();
 
 //Route files
