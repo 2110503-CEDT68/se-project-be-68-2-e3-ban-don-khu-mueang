@@ -21,6 +21,8 @@
     "seed-demo-clear": "node scripts/seedDemoData.js --clear=true"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.922.0",
+    "@aws-sdk/s3-request-presigner": "^3.922.0",
     "@exortek/express-mongo-sanitize": "^1.1.1",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",

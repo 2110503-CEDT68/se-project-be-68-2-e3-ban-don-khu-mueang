@@ -31,3 +31,5 @@ Supported flags for `node scripts/seedDemoData.js`:
 ## API Docs
 
 Open the Swagger UI at `/api-docs` when the server is running.
+
+Machine-readable OpenAPI JSON is available at `/api-docs.json`.

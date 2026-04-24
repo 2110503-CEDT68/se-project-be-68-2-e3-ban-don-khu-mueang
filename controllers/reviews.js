@@ -117,7 +117,7 @@ exports.getReviews = async (req, res, next) => {
     // We intentionally avoid populating massage to keep it as an ID string matching frontend TS Interface
     query = Review.find(dbQuery).populate({
         path: 'user',
-        select: 'name email'
+        select: 'name email avatarUrl'
     });
 
     // Select Fields

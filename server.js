@@ -37,11 +37,13 @@ const reviews = require('./routes/reviews');
 const massages = require('./routes/massages');
 const users = require('./routes/users');
 const promotions = require('./routes/promotions');
+const uploads = require('./routes/uploads');
 
 const app = express();
 
 //Swagger
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get("/api-docs.json", (req, res) => res.status(200).json(swaggerSpec));
 
 //Body parser
 app.use(express.json());
@@ -78,6 +80,7 @@ app.use('/api/massages', massages);
 app.use('/api/massages/:massageId/reservations', reservations);
 app.use('/api/users', users);
 app.use('/api/promotions', promotions);
+app.use('/api/uploads', uploads);
 // Global 404 and 500 error handlers
 app.use((req, res, next) => {
     res.status(404).json({
