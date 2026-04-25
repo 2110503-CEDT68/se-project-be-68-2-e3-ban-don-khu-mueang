@@ -19,6 +19,7 @@ const parsePositiveInt = (value, fallback) => {
 //@route    GET /api/reservations
 //@access   Private
 exports.getReservations = async (req, res, next) => {
+    console.log('getReservations called with query:', req.query, 'and params:', req.params);
     const reservationFilter = {};
     const userId = toSafeString(req.user.id);
 
@@ -45,7 +46,7 @@ exports.getReservations = async (req, res, next) => {
             })
             .populate({
                 path: 'user',
-                select: 'name tel email'
+                select: 'name tel email avatarUrl'
             })
             .skip(startIndex)
             .limit(limit);
@@ -80,7 +81,7 @@ exports.getReservation = async (req, res, next) => {
             select: 'name province tel'
         }).populate({
             path: 'user',
-            select: 'name tel email'
+            select: 'name tel email avatarUrl'
         });
 
         if (!reservation) {
