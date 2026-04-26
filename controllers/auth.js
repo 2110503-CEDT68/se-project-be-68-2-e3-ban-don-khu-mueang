@@ -113,7 +113,9 @@ exports.register = async (req, res) => {
             name: normalizedName,
             tel: normalizedTel,
             email: normalizedEmail,
-            password: normalizedPassword
+            password: normalizedPassword,
+            privacyPolicyAccepted: true,
+            privacyPolicyAcceptedAt: new Date()
         };
 
         const user = await User.create(createPayload);

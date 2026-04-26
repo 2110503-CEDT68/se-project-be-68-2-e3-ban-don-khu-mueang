@@ -44,6 +44,14 @@ const UserSchema = new mongoose.Schema({
         type: String,
         default: null
     },
+    privacyPolicyAccepted: {
+        type: Boolean,
+        default: false
+    },
+    privacyPolicyAcceptedAt: {
+        type: Date,
+        default: null
+    },
     createdAt: {
         type: Date,
         default: Date.now
