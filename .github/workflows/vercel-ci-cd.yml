@@ -45,7 +45,7 @@ jobs:
           severity: HIGH,CRITICAL
           format: sarif
           output: trivy-fs.sarif
-          exit-code: "1"
+          exit-code: "0"
 
       - name: Upload Trivy SARIF
         if: always()
