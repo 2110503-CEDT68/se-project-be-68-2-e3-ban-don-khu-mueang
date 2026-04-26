@@ -176,3 +176,85 @@ exports.registerAdmin = async (req, res) => {
         });
     }
 };
+
+// Add to controllers/auth.js
+
+//@desc    Update user details (Name, Email, Telephone)
+//@route   PUT /api/auth/updatedetails
+//@access  Private
+exports.updateDetails = async (req, res) => {
+    try {
+        const { name, email, tel, currentPassword } = req.body;
+
+        // 1. Verify current password for security
+        const user = await User.findById(req.user.id).select("+password");
+        const isMatch = await user.matchPassword(currentPassword);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: "Error: Current password is not correct" });
+        }
+
+        // 2. Check for duplicate email if the user is trying to change it
+        let normalizedNewEmail = user.email;
+        if (email) {
+            normalizedNewEmail = normalizeEmail(email); // Assuming normalizeEmail is defined in your file
+            
+            // Only check the database if the email is actually different from their current one
+            if (normalizedNewEmail !== user.email) {
+                const existingUser = await User.findOne({ email: normalizedNewEmail });
+                if (existingUser) {
+                    return res.status(400).json({ success: false, message: "Error: Email already in use by another account" });
+                }
+            }
+        }
+
+        // 3. Update fields
+        const fieldsToUpdate = {
+            name: name ? normalizeString(name) : user.name,
+            email: normalizedNewEmail,
+            tel: tel ? normalizeString(tel) : user.tel
+        };
+
+        const updatedUser = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+            new: true,
+            runValidators: true
+        });
+
+        res.status(200).json({ success: true, data: updatedUser });
+    } catch (error) {
+        console.error(error);
+        
+        // Handle MongoDB unique constraint error (just as a fallback)
+        if (error.code === 11000) {
+            return res.status(400).json({ success: false, message: "Error: Email already in use by another account" });
+        }
+
+        res.status(500).json({ success: false, message: "Error: Internal server error" });
+    }
+};
+
+//@desc     Update password
+//@route    PUT /api/auth/updatepassword
+//@access   Private
+exports.updatePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        const user = await User.findById(req.user.id).select("+password");
+        
+        // 1. Verify current password
+        const isMatch = await user.matchPassword(currentPassword);
+        if (!isMatch) {
+            return res.status(401).json({ success: false, message: "Error: Current password is not correct" });
+        }
+
+        // 2. Set new password and save (triggers mongoose pre-save hook to hash it)
+        user.password = newPassword;
+        await user.save();
+
+        // 3. Return a new token
+        sendTokenResponse(user, 200, res);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Error: Internal server error" });
+    }
+};

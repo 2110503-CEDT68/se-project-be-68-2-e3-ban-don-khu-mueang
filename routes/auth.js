@@ -1,5 +1,14 @@
+// se-project-be/routes/auth.js
 const express = require("express");
-const { login, logout, getMe, register, registerAdmin } = require("../controllers/auth");
+const { 
+    login, 
+    logout, 
+    getMe, 
+    register, 
+    registerAdmin,
+    updateDetails,     
+    updatePassword    
+} = require("../controllers/auth");
 
 const router = express.Router();
 
@@ -16,5 +25,9 @@ router.get("/admin-only", protect, authorize("admin"), (req, res) => {
         message: "Welcome, admin! You have access to this protected route."
     });
 });
+
+// ✅ Added the new update routes
+router.put("/updatedetails", protect, updateDetails);
+router.put("/updatepassword", protect, updatePassword);
 
 module.exports = router;
