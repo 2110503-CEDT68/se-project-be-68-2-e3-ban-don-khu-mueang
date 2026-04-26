@@ -1,4 +1,5 @@
 const Promotion = require("../models/Promotion");
+const { notifyNewPromotion } = require("../lib/notificationService");
 
 const WRITABLE_FIELDS = ["name", "amount", "startDate", "endDate", "isActive", "conditions"];
 
@@ -216,6 +217,7 @@ exports.createPromotion = async (req, res, next) => {
     try {
         const payload = buildPromotionPayload(req.body);
         const promotion = await Promotion.create(payload);
+        await notifyNewPromotion(promotion);
         res.status(201).json({ success: true, data: promotion });
     } catch (error) {
         console.error(error);

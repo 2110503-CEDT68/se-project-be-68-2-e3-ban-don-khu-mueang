@@ -1,4 +1,5 @@
 const Massage = require("../models/Massage");
+const { notifyShopClosure } = require("../lib/notificationService");
 const FILTERABLE_FIELDS = ["name", "district", "province", "postalcode", "tel", "price"];
 const WRITABLE_FIELDS = ["name", "address", "district", "province", "postalcode", "tel", "pictures", "price"];
 const SAFE_QUERY_OPERATORS = ["gt", "gte", "lt", "lte", "in"];
@@ -275,6 +276,9 @@ exports.deleteMassage = async (req, res, next) => {
         if (!massage) {
             return res.status(404).json({ success: false, message: `No massage shop with id ${massageId}` });
         }
+
+        // Notify users with active reservations before cascade deletion
+        await notifyShopClosure(massage._id, massage.name);
 
         // cascade delete is handled by the pre('deleteOne') hook on MassageSchema
         await massage.deleteOne();
