@@ -29,6 +29,8 @@ if (process.env.ENABLE_EXTERNAL_DNS === 'true') {
     const dns = require('node:dns');
     dns.setServers(['8.8.8.8', '1.1.1.1']);
 }
+const dns = require('node:dns');
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 connectDB();
 
@@ -41,6 +43,8 @@ const massages = require('./routes/massages');
 const users = require('./routes/users');
 const promotions = require('./routes/promotions');
 const uploads = require('./routes/uploads');
+const notifications = require('./routes/notifications');
+const cron = require('./routes/cron');
 
 const app = express();
 
@@ -84,6 +88,8 @@ app.use('/api/massages/:massageId/reservations', reservations);
 app.use('/api/users', users);
 app.use('/api/promotions', promotions);
 app.use('/api/uploads', uploads);
+app.use('/api/notifications', notifications);
+app.use('/api/cron', cron);
 // Global 404 and 500 error handlers
 app.use((req, res, next) => {
     res.status(404).json({
