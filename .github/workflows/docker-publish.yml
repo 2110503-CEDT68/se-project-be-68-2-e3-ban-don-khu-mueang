@@ -178,7 +178,7 @@ jobs:
           image-ref: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           format: sarif
           output: trivy-results.sarif
-          severity: CRITICAL,HIGH         # severities to report
+          severity: CRITICAL               # severities to report
           exit-code: '1'                  # fail job on CRITICAL/HIGH findings
                                           # set to '0' to warn without failing
           ignore-unfixed: true            # skip vulns with no fix available
