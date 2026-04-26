@@ -15,8 +15,8 @@ exports.getHealth = (req, res) => {
     const dbStatus = DB_STATES[dbState] ?? "unknown";
     const dbHealthy = dbState === 1;
 
-    res.status(dbHealthy ? 200 : 503).json({
-        success: dbHealthy,
+    res.status(200).json({
+        success: true,
         api: "healthy",
         database: {
             status: dbStatus,

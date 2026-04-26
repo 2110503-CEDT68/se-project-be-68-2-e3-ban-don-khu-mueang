@@ -1,0 +1,225 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# Docker Build → Publish → Scan
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# REGISTRY SELECTION
+# ──────────────────
+# Comment/uncomment the block you want in the "Registry config" env section and
+# the corresponding "Log in to registry" step below. Only one should be active.
+#
+#   GHCR  → free for public repos, free for private on GitHub Team/Enterprise.
+#           Image lives at ghcr.io/<owner>/<repo>.
+#           Auth uses the built-in GITHUB_TOKEN — no extra secrets needed.
+#
+#   Docker Hub → requires two repo secrets:
+#           DOCKERHUB_USERNAME  – your Docker Hub username
+#           DOCKERHUB_TOKEN     – an access token (not your password)
+#           Create one at: https://hub.docker.com/settings/security
+#
+# SCANNING
+# ────────
+# Trivy scans the built image for OS + library CVEs before it is ever pushed.
+# Results are uploaded to GitHub Security → Code scanning tab (SARIF format).
+# The job fails on CRITICAL findings by default; adjust EXIT_CODE / SEVERITY
+# in the "Scan image" step to change this behaviour.
+#
+# TRIGGERS
+# ────────
+#   • push to main / master
+#   • any version tag  (v1.2.3)
+#   • pull requests    (build + scan only, no push)
+#   • manual dispatch  (Actions → Run workflow)
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: Docker Build, Publish & Scan
+
+on:
+  push:
+    branches: [main, master]
+    tags:    ['v*.*.*']
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+# Least-privilege default; individual jobs elevate as needed.
+permissions:
+  contents: read
+
+# Cancel in-flight runs for the same ref (saves minutes on rapid pushes).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Environment – Registry config
+# ─────────────────────────────────────────────────────────────────────────────
+env:
+
+  # ── Option A: GitHub Container Registry (GHCR) ────────────────────────────
+  # No extra secrets required.
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}          # ghcr.io/<owner>/<repo>
+
+  # ── Option B: Docker Hub ──────────────────────────────────────────────────
+  # Uncomment the two lines below and comment out the two lines above.
+  # Add DOCKERHUB_USERNAME and DOCKERHUB_TOKEN as repo secrets.
+  # REGISTRY: docker.io
+  # IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
+
+# ─────────────────────────────────────────────────────────────────────────────
+jobs:
+# ─────────────────────────────────────────────────────────────────────────────
+
+  build-scan-push:
+    name: Build → Scan → Push
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents:      read
+      packages:      write          # push to GHCR
+      security-events: write        # upload Trivy SARIF results
+      id-token:      write          # needed for cosign provenance (optional)
+
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-ref:    ${{ steps.meta.outputs.tags }}
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Set up QEMU (multi-arch cross-compilation) ────────────────────
+      # Remove this step if you only target linux/amd64.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # ── 3. Set up Docker Buildx ──────────────────────────────────────────
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          # BuildKit cache speeds up repeated builds significantly.
+          driver-opts: image=moby/buildkit:latest
+
+      # ── 4. Log in to registry ────────────────────────────────────────────
+
+      # ── Option A: GHCR login (uses built-in GITHUB_TOKEN) ─────────────
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── Option B: Docker Hub login ─────────────────────────────────────
+      # Uncomment this block and comment out the GHCR block above.
+      # - name: Log in to Docker Hub
+      #   if: github.event_name != 'pull_request'
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ${{ env.REGISTRY }}
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # ── 5. Extract Docker metadata (tags + labels) ───────────────────────
+      # Tags produced:
+      #   main branch push  →  ghcr.io/owner/repo:main
+      #                        ghcr.io/owner/repo:sha-<short-sha>
+      #   version tag push  →  ghcr.io/owner/repo:1.2.3
+      #                        ghcr.io/owner/repo:1.2
+      #                        ghcr.io/owner/repo:1
+      #                        ghcr.io/owner/repo:latest
+      #   pull request      →  not pushed (build + scan only)
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha,prefix=sha-
+          labels: |
+            org.opencontainers.image.title=${{ github.event.repository.name }}
+            org.opencontainers.image.description=${{ github.event.repository.description }}
+            org.opencontainers.image.url=${{ github.event.repository.html_url }}
+            org.opencontainers.image.source=${{ github.event.repository.clone_url }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      # ── 6. Build image (load into local Docker for scanning) ─────────────
+      # We build first into the local daemon so Trivy can scan before any push.
+      # The image is also exported as a tarball for the scan step.
+      - name: Build image (local)
+        id: build-local
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64          # add ,linux/arm64 if needed
+          push: false
+          load: true                      # loads into local docker daemon
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha            # GitHub Actions cache
+          cache-to:   type=gha,mode=max
+
+      # ── 7. Scan image with Trivy ─────────────────────────────────────────
+      # Scans for OS packages + application library CVEs.
+      # SARIF results appear in GitHub Security → Code scanning.
+      # Change EXIT_CODE to 0 to make the job non-blocking on findings.
+      - name: Scan image with Trivy
+        id: trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH         # severities to report
+          exit-code: '1'                  # fail job on CRITICAL/HIGH findings
+                                          # set to '0' to warn without failing
+          ignore-unfixed: true            # skip vulns with no fix available
+          vuln-type: os,library
+
+      - name: Upload Trivy scan results to GitHub Security
+        if: always()                      # upload even if the scan step fails
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-container
+
+      # ── 8. Build & push final image ──────────────────────────────────────
+      # Only runs after a clean scan and only on non-PR events.
+      - name: Build and push image
+        id: build
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64          # add ,linux/arm64 if needed
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
+          # Embeds provenance attestation in the image manifest (GHCR supports this).
+          # Set to false for Docker Hub if it causes push issues.
+          provenance: true
+          sbom: true                      # attach SBOM to the image manifest
+
+      # ── 9. Print image digest ─────────────────────────────────────────────
+      - name: Print image digest
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "### ✅ Image published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Registry:** \`${{ env.REGISTRY }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Digest:** \`${{ steps.build.outputs.digest }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Tags:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
