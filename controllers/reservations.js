@@ -45,7 +45,7 @@ exports.getReservations = async (req, res, next) => {
             })
             .populate({
                 path: 'user',
-                select: 'name tel email'
+                select: 'name tel email avatarUrl'
             })
             .skip(startIndex)
             .limit(limit);

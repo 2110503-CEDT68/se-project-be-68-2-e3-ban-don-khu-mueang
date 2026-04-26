@@ -239,7 +239,7 @@ exports.getMyReviews = async (req, res, next) => {
 exports.getAdminReviews = async (req, res, next) => {  // <--- RENAME THIS
     try {
         const reviews = await Review.find()
-            .populate({ path: 'user', select: 'name email' }) 
+            .populate({ path: 'user', select: 'name email avatarUrl' }) 
             .populate({ path: 'reservation', select: 'reserveDate createdAt' })
             .populate({ path: 'massage', select: 'name province' })
             .sort('-createdAt');
@@ -337,7 +337,7 @@ exports.deleteReview = async (req, res, next) => {
 exports.getReview = async (req, res, next) => {
     try {
         const review = await Review.findById(req.params.id)
-            .populate({ path: 'user', select: 'name email' })
+            .populate({ path: 'user', select: 'name email avatarUrl' })
             .populate({ path: 'massage', select: 'name province' });
 
         if (!review) {

@@ -19,3 +19,5 @@ resource/
 
 pnpm-lock.yaml
 pnpm-workspace.yaml
+.vercel
+.env*.local
