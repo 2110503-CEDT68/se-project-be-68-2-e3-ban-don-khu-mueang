@@ -1,138 +1,140 @@
 name: CI and Vercel Deployment
 
+on:
+  pull_request:
+    branches: [main, master]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vercel-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
-on:
-  push:
-    branches: ['**']
-  pull_request:
-    branches: [main]
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+  SONAR_ORG: ${{ secrets.SONAR_ORG }}
 
 jobs:
   security:
-    name: Security and Quality Checks
+    name: Security and quality checks
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # ── 1. Secret scanning ───────────────────────────────────────────────
-      - name: Secret Scan (Gitleaks)
-        uses: gitleaks/gitleaks-action@v2
-        if: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # ── 2. Dependency + IaC + container vuln scan ────────────────────────
-      - name: Vulnerability Scan (Trivy Filesystem)
-        uses: aquasecurity/trivy-action@master
-        continue-on-error: true
+      - name: Vulnerability scan (Trivy filesystem)
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          severity: 'HIGH,CRITICAL'
-          format: 'sarif'
-          # Using absolute path to ensure the file is found by the next step
-          output: 'trivy.sarif'
-          # Set to 1 if you want to stop the pipeline on vulnerabilities
-          exit-code: 1 
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          format: sarif
+          output: trivy-fs.sarif
+          exit-code: "1"
 
-      - name: Upload Trivy SARIF to GitHub Security
+      - name: Upload Trivy SARIF
         if: always()
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: 'trivy.sarif'
+          sarif_file: trivy-fs.sarif
+          category: trivy-filesystem
 
-      # ── 3. SAST + quality gate ───────────────────────────────────────────
-      - name: SonarCloud Scan
+      - name: SonarCloud scan
+        if: env.SONAR_TOKEN != '' && env.SONAR_PROJECT_KEY != '' && env.SONAR_ORG != ''
         uses: SonarSource/sonarqube-scan-action@v7.1.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.organization=${{ secrets.SONAR_ORG }}
+            -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ env.SONAR_ORG }}
             -Dsonar.sources=.
             -Dsonar.exclusions=node_modules/**,dist/**,.next/**,build/**
 
   codeql:
-    name: CodeQL Deep SAST
+    name: CodeQL deep SAST
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     needs: security
     permissions:
       contents: read
       security-events: write
-    strategy:
-      matrix:
-        language: [javascript]
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
-          languages: ${{ matrix.language }}
+          languages: javascript
 
-      - name: Build for CodeQL Analysis
+      - name: Build for CodeQL analysis
         uses: github/codeql-action/autobuild@v4
 
       - name: Analyze with CodeQL
         uses: github/codeql-action/analyze@v4
         with:
-          category: "/language:${{ matrix.language }}"
+          category: /language:javascript
 
-  deploy:
-    name: Vercel Deploy (Prod on main, Preview on PR to main)
+  deploy-preview:
+    name: Vercel preview deploy
+    if: github.event_name == 'pull_request' && !github.event.pull_request.draft && github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     needs: codeql
-    if: >
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'pull_request' && github.base_ref == 'main')
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      - name: Pull Vercel Environment (Production or Preview)
-        run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          else
-            vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-          fi
+      - name: Pull preview environment
+        run: vercel pull --yes --environment=preview --token="${{ env.VERCEL_TOKEN }}"
 
-      - name: Build and Deploy to Vercel
+      - name: Build and deploy preview
         id: deploy
         run: |
-          if [ "${{ github.event_name }}" = "push" ]; then
-            vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-            URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
-          else
-            vercel build --token=${{ secrets.VERCEL_TOKEN }}
-            URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
-          fi
-          echo "vercel_url=$URL" >> $GITHUB_OUTPUT
-          echo "### Deployment Status: ✅ Success" >> $GITHUB_STEP_SUMMARY
-          echo "URL: $URL" >> $GITHUB_STEP_SUMMARY
+          vercel build --token="${{ env.VERCEL_TOKEN }}"
+          URL="$(vercel deploy --prebuilt --token="${{ env.VERCEL_TOKEN }}")"
+          echo "vercel_url=$URL" >> "$GITHUB_OUTPUT"
+          echo "### Preview deployment successful" >> "$GITHUB_STEP_SUMMARY"
+          echo "URL: $URL" >> "$GITHUB_STEP_SUMMARY"
 
-      # - name: Comment on PR
-      #   if: github.event_name == 'pull_request'
-      #   uses: thollander/actions-comment-pull-request@v2
-      #   with:
-      #     message: |
-      #       ### Preview Deployment Ready! 🚀
-      #       **URL:** [${{ steps.deploy.outputs.vercel_url }}](${{ steps.deploy.outputs.vercel_url }})
+  deploy-production:
+    name: Vercel production deploy
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull production environment
+        run: vercel pull --yes --environment=production --token="${{ env.VERCEL_TOKEN }}"
+
+      - name: Build and deploy production
+        id: deploy
+        run: |
+          vercel build --prod --token="${{ env.VERCEL_TOKEN }}"
+          URL="$(vercel deploy --prebuilt --prod --token="${{ env.VERCEL_TOKEN }}")"
+          echo "vercel_url=$URL" >> "$GITHUB_OUTPUT"
+          echo "### Production deployment successful" >> "$GITHUB_STEP_SUMMARY"
+          echo "URL: $URL" >> "$GITHUB_STEP_SUMMARY"
