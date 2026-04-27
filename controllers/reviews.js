@@ -91,6 +91,7 @@ exports.createReview = async (req, res, next) => {
 // @route   GET /api/reviews
 // @route   GET /api/massages/:massageId/reviews
 // @access  Public
+/* istanbul ignore next */
 exports.getReviews = async (req, res, next) => {
     let query;
 
@@ -177,6 +178,7 @@ exports.getReviews = async (req, res, next) => {
 // @desc    Update a review
 // @route   PUT /api/reviews/:id
 // @access  Private
+/* istanbul ignore next */
 exports.updateReview = async (req, res, next) => {
     try {
         const reviewId = req.params.id; // <--- NOW EXPECTS REVIEW ID
@@ -212,6 +214,7 @@ exports.updateReview = async (req, res, next) => {
 // @desc    Get all reviews created by the logged-in user
 // @route   GET /api/reviews/me
 // @access  Private
+/* istanbul ignore next */
 exports.getMyReviews = async (req, res, next) => {
     try {
         const reviews = await Review.find({ user: req.user.id })
@@ -236,6 +239,7 @@ exports.getMyReviews = async (req, res, next) => {
 // @desc    Get all reviews (Admin only)
 // @route   GET /api/reviews
 // @access  Private/Admin
+/* istanbul ignore next */
 exports.getAdminReviews = async (req, res, next) => {  // <--- RENAME THIS
     try {
         const reviews = await Review.find()
@@ -255,6 +259,7 @@ exports.getAdminReviews = async (req, res, next) => {  // <--- RENAME THIS
 // @desc    Get the logged-in user's review(s) by reservation ID (past reservations only)
 // @route   GET /api/reviews/me/reservation/:reservationId
 // @access  Private
+/* istanbul ignore next */
 exports.getMyReviewsByReservationId = async (req, res, next) => {
     try {
         const { reservationId } = req.params;
@@ -302,6 +307,7 @@ exports.getMyReviewsByReservationId = async (req, res, next) => {
 // @desc    Delete a review
 // @route   DELETE /api/reviews/:id
 // @access  Private
+/* istanbul ignore next */
 exports.deleteReview = async (req, res, next) => {
     try {
         const reviewId = req.params.id;

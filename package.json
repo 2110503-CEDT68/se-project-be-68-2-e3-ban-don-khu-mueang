@@ -16,6 +16,7 @@
   "main": "server.js",
   "scripts": {
     "test": "newman run \"tests/test.json\"",
+    "test:unit": "jest",
     "dev": "nodemon server.js",
     "seed-demo": "node scripts/seedDemoData.js --clear=false",
     "seed-demo-clear": "node scripts/seedDemoData.js --clear=true"
