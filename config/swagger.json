@@ -1,14 +1,14 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Massage Booking API",
+    "title": "ZenMassage API",
     "version": "1.0.0",
-    "description": "API documentation for massage booking application"
+    "description": "REST API for ZenMassage - Software Engineering Project\nGroup Name: E3 บ้านดอน คูเมือง | Group No.14\nCourse: 2110423 Software Engineering \nInstructor: Prof. Wiwat Vatanawood, Ph.D."
   },
   "servers": [
     {
       "url": "http://localhost:5000",
-      "description": "Local development server"
+      "description": "Development"
     }
   ],
   "components": {
@@ -16,8 +16,7 @@
       "bearerAuth": {
         "type": "http",
         "scheme": "bearer",
-        "bearerFormat": "JWT",
-        "description": "Enter your JWT token"
+        "bearerFormat": "JWT"
       }
     },
     "schemas": {
@@ -26,20 +25,19 @@
         "properties": {
           "_id": {
             "type": "string",
-            "example": "64a1f2b3c4d5e6f7a8b9c0d1"
+            "example": "64a1b2c3d4e5f6a7b8c9d0e1"
           },
           "name": {
             "type": "string",
             "example": "John Doe"
           },
+          "email": {
+            "type": "string",
+            "example": "john@example.com"
+          },
           "tel": {
             "type": "string",
             "example": "081-234-5678"
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "example": "john@example.com"
           },
           "role": {
             "type": "string",
@@ -49,15 +47,13 @@
             ],
             "example": "user"
           },
-          "avatarKey": {
-            "type": "string",
-            "nullable": true,
-            "example": "avatars/64a1f2b3c4d5e6f7a8b9c0d1.jpg"
-          },
           "avatarUrl": {
             "type": "string",
-            "nullable": true,
-            "example": "https://example-bucket.r2.dev/avatars/64a1f2b3c4d5e6f7a8b9c0d1.jpg"
+            "nullable": true
+          },
+          "privacyPolicyAccepted": {
+            "type": "boolean",
+            "example": false
           },
           "createdAt": {
             "type": "string",
@@ -70,19 +66,19 @@
         "properties": {
           "_id": {
             "type": "string",
-            "example": "64a1f2b3c4d5e6f7a8b9c0d2"
+            "example": "64a1b2c3d4e5f6a7b8c9d0e1"
           },
           "name": {
             "type": "string",
-            "example": "Serene Touch Massage"
+            "example": "Zen Spa"
           },
           "address": {
             "type": "string",
-            "example": "123 Main Street"
+            "example": "123 Main St"
           },
           "district": {
             "type": "string",
-            "example": "Pathum Wan"
+            "example": "Sathon"
           },
           "province": {
             "type": "string",
@@ -90,91 +86,33 @@
           },
           "postalcode": {
             "type": "string",
-            "example": "10330"
+            "example": "10120"
           },
           "tel": {
             "type": "string",
-            "example": "02-123-4567"
+            "example": "02-000-0000"
           },
           "pictures": {
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "example": [
-              "https://placehold.co/600x400"
-            ]
+            }
           },
           "price": {
             "type": "number",
             "example": 500
-          },
-          "ratingSum": {
-            "type": "number",
-            "example": 45
-          },
-          "userRatingCount": {
-            "type": "number",
-            "example": 10
           },
           "averageRating": {
             "type": "number",
             "example": 4.5
           },
+          "userRatingCount": {
+            "type": "number",
+            "example": 10
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
-          }
-        }
-      },
-      "MassageInput": {
-        "type": "object",
-        "required": [
-          "name",
-          "address",
-          "district",
-          "province",
-          "postalcode",
-          "tel",
-          "price"
-        ],
-        "properties": {
-          "name": {
-            "type": "string",
-            "example": "Serene Touch Massage"
-          },
-          "address": {
-            "type": "string",
-            "example": "123 Main Street"
-          },
-          "district": {
-            "type": "string",
-            "example": "Pathum Wan"
-          },
-          "province": {
-            "type": "string",
-            "example": "Bangkok"
-          },
-          "postalcode": {
-            "type": "string",
-            "example": "10330"
-          },
-          "tel": {
-            "type": "string",
-            "example": "02-123-4567"
-          },
-          "pictures": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "example": [
-              "https://placehold.co/600x400"
-            ]
-          },
-          "price": {
-            "type": "number",
-            "example": 500
           }
         }
       },
@@ -182,21 +120,41 @@
         "type": "object",
         "properties": {
           "_id": {
-            "type": "string",
-            "example": "64a1f2b3c4d5e6f7a8b9c0d3"
+            "type": "string"
           },
           "reserveDate": {
             "type": "string",
-            "format": "date-time",
-            "example": "2026-03-15T10:00:00.000Z"
+            "format": "date-time"
           },
           "user": {
             "type": "string",
-            "example": "64a1f2b3c4d5e6f7a8b9c0d1"
+            "description": "User ID"
           },
           "massage": {
             "type": "string",
-            "example": "64a1f2b3c4d5e6f7a8b9c0d2"
+            "description": "Massage ID"
+          },
+          "price": {
+            "type": "number",
+            "example": 500
+          },
+          "netPrice": {
+            "type": "number",
+            "example": 450
+          },
+          "discount": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "amount": {
+                  "type": "number"
+                }
+              }
+            }
           },
           "createdAt": {
             "type": "string",
@@ -204,47 +162,20 @@
           }
         }
       },
-      "ReservationInput": {
+      "Review": {
         "type": "object",
-        "required": [
-          "reserveDate",
-          "massage"
-        ],
         "properties": {
-          "reserveDate": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2026-03-15T10:00:00.000Z"
+          "_id": {
+            "type": "string"
+          },
+          "reservation": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
           },
           "massage": {
-            "type": "string",
-            "description": "ID of the massage shop",
-            "example": "64a1f2b3c4d5e6f7a8b9c0d2"
-          }
-        }
-      },
-      "ReservationUpdateInput": {
-        "type": "object",
-        "description": "Only reserveDate can be updated on a reservation",
-        "properties": {
-          "reserveDate": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2026-03-20T14:00:00.000Z"
-          }
-        }
-      },
-      "ReviewInput": {
-        "type": "object",
-        "required": [
-          "reservation",
-          "rating"
-        ],
-        "properties": {
-          "reservation": {
-            "type": "string",
-            "description": "Reservation ID",
-            "example": "64a1f2b3c4d5e6f7a8b9c0d3"
+            "type": "string"
           },
           "rating": {
             "type": "integer",
@@ -254,83 +185,94 @@
           },
           "comment": {
             "type": "string",
-            "example": "Great service and relaxing atmosphere"
-          }
-        }
-      },
-      "Review": {
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string",
-            "example": "64a1f2b3c4d5e6f7a8b9c0d4"
-          },
-          "reservation": {
-            "type": "string",
-            "example": "64a1f2b3c4d5e6f7a8b9c0d3"
-          },
-          "user": {
-            "type": "string",
-            "example": "64a1f2b3c4d5e6f7a8b9c0d1"
-          },
-          "massage": {
-            "type": "string",
-            "example": "64a1f2b3c4d5e6f7a8b9c0d2"
-          },
-          "rating": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 5,
-            "example": 4
-          },
-          "comment": {
-            "type": "string",
-            "example": "Great service and relaxing atmosphere"
+            "example": "Great service!"
           },
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "Promotion": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
           },
-          "updatedAt": {
+          "name": {
+            "type": "string",
+            "example": "Summer Sale"
+          },
+          "amount": {
+            "type": "number",
+            "example": 20,
+            "description": "Discount percentage (1-100)"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "conditions": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "minReservations": {
+                "type": "number"
+              }
+            }
+          },
+          "createdAt": {
             "type": "string",
             "format": "date-time"
           }
         }
       },
-      "UploadTarget": {
-        "type": "string",
-        "enum": [
-          "avatar",
-          "massage"
-        ],
-        "example": "avatar"
-      },
-      "GenerateUploadUrlRequest": {
+      "Notification": {
         "type": "object",
-        "required": [
-          "target",
-          "contentType"
-        ],
         "properties": {
-          "target": {
-            "$ref": "#/components/schemas/UploadTarget"
+          "_id": {
+            "type": "string"
           },
-          "contentType": {
+          "user": {
+            "type": "string"
+          },
+          "type": {
             "type": "string",
             "enum": [
-              "image/jpeg",
-              "image/png"
-            ],
-            "example": "image/jpeg"
+              "shop_closed",
+              "promotion_new",
+              "promotion_expiring"
+            ]
           },
-          "massageId": {
+          "title": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "isRead": {
+            "type": "boolean"
+          },
+          "metadata": {
+            "type": "object"
+          },
+          "createdAt": {
             "type": "string",
-            "description": "Required when target is massage",
-            "example": "64a1f2b3c4d5e6f7a8b9c0d2"
+            "format": "date-time"
           }
         }
       },
-      "GenerateUploadUrlResponse": {
+      "SuccessResponse": {
         "type": "object",
         "properties": {
           "success": {
@@ -338,101 +280,7 @@
             "example": true
           },
           "data": {
-            "type": "object",
-            "properties": {
-              "url": {
-                "type": "string",
-                "example": "https://example.r2.cloudflarestorage.com/bucket/avatars/64a1f2b3c4d5e6f7a8b9c0d1.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256"
-              },
-              "key": {
-                "type": "string",
-                "example": "avatars/64a1f2b3c4d5e6f7a8b9c0d1.jpg"
-              },
-              "expiresIn": {
-                "type": "integer",
-                "example": 300
-              },
-              "target": {
-                "$ref": "#/components/schemas/UploadTarget"
-              },
-              "contentType": {
-                "type": "string",
-                "enum": [
-                  "image/jpeg",
-                  "image/png"
-                ]
-              }
-            }
-          }
-        }
-      },
-      "FinalizeUploadRequest": {
-        "type": "object",
-        "required": [
-          "target",
-          "key"
-        ],
-        "properties": {
-          "target": {
-            "$ref": "#/components/schemas/UploadTarget"
-          },
-          "key": {
-            "type": "string",
-            "example": "avatars/64a1f2b3c4d5e6f7a8b9c0d1.jpg"
-          },
-          "massageId": {
-            "type": "string",
-            "description": "Required when target is massage",
-            "example": "64a1f2b3c4d5e6f7a8b9c0d2"
-          }
-        }
-      },
-      "FinalizeAvatarUploadResponse": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "example": true
-          },
-          "data": {
-            "type": "object",
-            "properties": {
-              "avatarKey": {
-                "type": "string",
-                "example": "avatars/64a1f2b3c4d5e6f7a8b9c0d1.jpg"
-              },
-              "avatarUrl": {
-                "type": "string",
-                "example": "https://example-bucket.r2.dev/avatars/64a1f2b3c4d5e6f7a8b9c0d1.jpg"
-              }
-            }
-          }
-        }
-      },
-      "FinalizeMassageUploadResponse": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "example": true
-          },
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "example": "64a1f2b3c4d5e6f7a8b9c0d2"
-              },
-              "pictures": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "example": [
-                  "https://example-bucket.r2.dev/massages/64a1f2b3c4d5e6f7a8b9c0d2/1713696000000-64a1f2b3c4d5e6f7a8b9c0d1.jpg"
-                ]
-              }
-            }
+            "type": "object"
           }
         }
       },
@@ -445,7 +293,7 @@
           },
           "message": {
             "type": "string",
-            "example": "R2 configuration is missing"
+            "example": "Error message"
           }
         }
       }
@@ -454,13 +302,79 @@
   "paths": {
     "/api/health": {
       "get": {
-        "summary": "Check API and database health",
         "tags": [
           "Health"
         ],
+        "summary": "Health check",
+        "description": "Check if the API server is running and healthy",
         "responses": {
           "200": {
-            "description": "API and database are healthy",
+            "description": "Server is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "API is running"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Register new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "email",
+                  "tel",
+                  "password"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "john@example.com"
+                  },
+                  "tel": {
+                    "type": "string",
+                    "example": "081-234-5678"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123",
+                    "minLength": 6
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -469,37 +383,103 @@
                     "success": {
                       "type": "boolean"
                     },
-                    "api": {
+                    "token": {
                       "type": "string"
-                    },
-                    "database": {
-                      "type": "object",
-                      "properties": {
-                        "status": {
-                          "type": "string"
-                        },
-                        "healthy": {
-                          "type": "boolean"
-                        }
-                      }
                     }
                   }
                 }
               }
             }
           },
-          "503": {
-            "description": "Database is not healthy"
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Login",
+        "description": "Login with email and password. Returns JWT token.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "john@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "password123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "token": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Logout",
+        "description": "Logout and clear cookie",
+        "responses": {
+          "200": {
+            "description": "Logged out successfully"
           }
         }
       }
     },
     "/api/auth/me": {
       "get": {
-        "summary": "Get current logged in user",
         "tags": [
           "Authentication"
         ],
+        "summary": "Get current user",
         "security": [
           {
             "bearerAuth": []
@@ -507,7 +487,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved user information",
+            "description": "Current user data",
             "content": {
               "application/json": {
                 "schema": {
@@ -525,173 +505,17 @@
             }
           },
           "401": {
-            "description": "Unauthorized - Not logged in"
-          }
-        }
-      }
-    },
-    "/api/auth/login": {
-      "post": {
-        "summary": "Login user",
-        "tags": [
-          "Authentication"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "email",
-                  "password"
-                ],
-                "properties": {
-                  "email": {
-                    "type": "string",
-                    "format": "email",
-                    "example": "user@example.com"
-                  },
-                  "password": {
-                    "type": "string",
-                    "format": "password",
-                    "example": "password123"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successfully logged in",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "token": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid credentials"
-          },
-          "401": {
             "description": "Unauthorized"
-          }
-        }
-      }
-    },
-    "/api/auth/logout": {
-      "get": {
-        "summary": "Logout user",
-        "tags": [
-          "Authentication"
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully logged out",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/auth/register": {
-      "post": {
-        "summary": "Register new user",
-        "tags": [
-          "Authentication"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "name",
-                  "email",
-                  "password",
-                  "tel"
-                ],
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "example": "John Doe"
-                  },
-                  "email": {
-                    "type": "string",
-                    "format": "email",
-                    "example": "john@example.com"
-                  },
-                  "password": {
-                    "type": "string",
-                    "format": "password",
-                    "example": "password123"
-                  },
-                  "tel": {
-                    "type": "string",
-                    "example": "081-234-5678",
-                    "description": "Must be in the format xxx-xxx-xxxx"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "User successfully registered",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "token": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid input or user already exists"
           }
         }
       }
     },
     "/api/auth/register-admin": {
       "post": {
-        "summary": "Register new admin user (Admin only)",
         "tags": [
           "Authentication"
         ],
+        "summary": "Register admin (Admin only)",
         "security": [
           {
             "bearerAuth": []
@@ -706,8 +530,8 @@
                 "required": [
                   "name",
                   "email",
-                  "password",
-                  "tel"
+                  "tel",
+                  "password"
                 ],
                 "properties": {
                   "name": {
@@ -716,18 +540,15 @@
                   },
                   "email": {
                     "type": "string",
-                    "format": "email",
                     "example": "admin@example.com"
-                  },
-                  "password": {
-                    "type": "string",
-                    "format": "password",
-                    "example": "password123"
                   },
                   "tel": {
                     "type": "string",
-                    "example": "081-234-5678",
-                    "description": "Must be in the format xxx-xxx-xxxx"
+                    "example": "081-000-0000"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "securepass"
                   }
                 }
               }
@@ -736,41 +557,20 @@
         },
         "responses": {
           "201": {
-            "description": "Admin user successfully registered",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "token": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid input or user already exists"
-          },
-          "401": {
-            "description": "Unauthorized - Not logged in"
+            "description": "Admin registered"
           },
           "403": {
-            "description": "Forbidden - Not an admin"
+            "description": "Forbidden - admin only"
           }
         }
       }
     },
     "/api/auth/admin-only": {
       "get": {
-        "summary": "Test admin-only protected route",
         "tags": [
           "Authentication"
         ],
+        "summary": "Admin test route (Admin only)",
         "security": [
           {
             "bearerAuth": []
@@ -778,38 +578,110 @@
         ],
         "responses": {
           "200": {
-            "description": "Successfully accessed admin route",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
+            "description": "Admin access confirmed"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/auth/updatedetails": {
+      "put": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Update user details",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "New Name"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "newemail@example.com"
+                  },
+                  "tel": {
+                    "type": "string",
+                    "example": "082-000-0000"
                   }
                 }
               }
             }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Details updated"
           },
           "401": {
-            "description": "Unauthorized - Not logged in"
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/auth/updatepassword": {
+      "put": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Update password",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "currentPassword",
+                  "newPassword"
+                ],
+                "properties": {
+                  "currentPassword": {
+                    "type": "string",
+                    "example": "oldpassword"
+                  },
+                  "newPassword": {
+                    "type": "string",
+                    "example": "newpassword123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password updated"
           },
-          "403": {
-            "description": "Forbidden - Not an admin"
+          "401": {
+            "description": "Unauthorized or wrong current password"
           }
         }
       }
     },
     "/api/massages": {
       "get": {
-        "summary": "Get all massage shops",
         "tags": [
           "Massages"
         ],
+        "summary": "Get all massage shops",
         "parameters": [
           {
             "in": "query",
@@ -817,7 +689,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Comma-separated fields to include (e.g. name,province)"
+            "description": "Fields to select (comma separated)"
           },
           {
             "in": "query",
@@ -825,25 +697,23 @@
             "schema": {
               "type": "string"
             },
-            "description": "Comma-separated fields to sort by (prefix with - for descending)"
+            "description": "Sort by field"
           },
           {
             "in": "query",
             "name": "page",
             "schema": {
-              "type": "integer",
-              "default": 1
+              "type": "integer"
             },
-            "description": "Page number for pagination"
+            "description": "Page number"
           },
           {
             "in": "query",
             "name": "limit",
             "schema": {
-              "type": "integer",
-              "default": 25
+              "type": "integer"
             },
-            "description": "Number of results per page"
+            "description": "Results per page"
           }
         ],
         "responses": {
@@ -860,33 +730,6 @@
                     "count": {
                       "type": "integer"
                     },
-                    "pagination": {
-                      "type": "object",
-                      "properties": {
-                        "next": {
-                          "type": "object",
-                          "properties": {
-                            "page": {
-                              "type": "integer"
-                            },
-                            "limit": {
-                              "type": "integer"
-                            }
-                          }
-                        },
-                        "prev": {
-                          "type": "object",
-                          "properties": {
-                            "page": {
-                              "type": "integer"
-                            },
-                            "limit": {
-                              "type": "integer"
-                            }
-                          }
-                        }
-                      }
-                    },
                     "data": {
                       "type": "array",
                       "items": {
@@ -897,17 +740,14 @@
                 }
               }
             }
-          },
-          "500": {
-            "description": "Internal server error"
           }
         }
       },
       "post": {
-        "summary": "Create a new massage shop (Admin only)",
         "tags": [
           "Massages"
         ],
+        "summary": "Create massage shop (Admin only)",
         "security": [
           {
             "bearerAuth": []
@@ -918,48 +758,72 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MassageInput"
+                "type": "object",
+                "required": [
+                  "name",
+                  "address",
+                  "district",
+                  "province",
+                  "postalcode",
+                  "tel",
+                  "price"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Zen Spa"
+                  },
+                  "address": {
+                    "type": "string",
+                    "example": "123 Main St"
+                  },
+                  "district": {
+                    "type": "string",
+                    "example": "Sathon"
+                  },
+                  "province": {
+                    "type": "string",
+                    "example": "Bangkok"
+                  },
+                  "postalcode": {
+                    "type": "string",
+                    "example": "10120"
+                  },
+                  "tel": {
+                    "type": "string",
+                    "example": "02-000-0000"
+                  },
+                  "price": {
+                    "type": "number",
+                    "example": 500
+                  },
+                  "pictures": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Massage shop created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/Massage"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid input"
-          },
-          "401": {
-            "description": "Unauthorized - Not logged in"
+            "description": "Massage shop created"
           },
           "403": {
-            "description": "Forbidden - Not an admin"
+            "description": "Forbidden"
           }
         }
       }
     },
     "/api/massages/{id}": {
       "get": {
-        "summary": "Get a single massage shop",
         "tags": [
           "Massages"
         ],
+        "summary": "Get single massage shop",
         "parameters": [
           {
             "in": "path",
@@ -973,7 +837,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Massage shop details",
+            "description": "Massage shop data",
             "content": {
               "application/json": {
                 "schema": {
@@ -990,16 +854,16 @@
               }
             }
           },
-          "400": {
-            "description": "Massage shop not found"
+          "404": {
+            "description": "Not found"
           }
         }
       },
       "put": {
-        "summary": "Update a massage shop (Admin only)",
         "tags": [
           "Massages"
         ],
+        "summary": "Update massage shop (Admin only)",
         "security": [
           {
             "bearerAuth": []
@@ -1012,8 +876,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Massage shop ID"
+            }
           }
         ],
         "requestBody": {
@@ -1021,52 +884,28 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MassageInput"
+                "$ref": "#/components/schemas/Massage"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Massage shop updated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/Massage"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid input"
-          },
-          "401": {
-            "description": "Unauthorized - Not logged in"
+            "description": "Updated successfully"
           },
           "403": {
-            "description": "Forbidden - Not an admin"
+            "description": "Forbidden"
           },
           "404": {
-            "description": "Massage shop not found"
-          },
-          "500": {
-            "description": "Internal server error"
+            "description": "Not found"
           }
         }
       },
       "delete": {
-        "summary": "Delete a massage shop (Admin only)",
         "tags": [
           "Massages"
         ],
+        "summary": "Delete massage shop (Admin only)",
         "security": [
           {
             "bearerAuth": []
@@ -1079,13 +918,530 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Massage shop ID"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Massage shop deleted (associated reservations are also removed)",
+            "description": "Deleted successfully"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/reviews": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Get all reviews (Public)",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "massageId",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter reviews by massage shop ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of reviews",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Review"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Create review",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "reservation",
+                  "massage",
+                  "rating"
+                ],
+                "properties": {
+                  "reservation": {
+                    "type": "string",
+                    "example": "64a1b2c3d4e5f6a7b8c9d0e1"
+                  },
+                  "massage": {
+                    "type": "string",
+                    "example": "64a1b2c3d4e5f6a7b8c9d0e2"
+                  },
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5,
+                    "example": 5
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Excellent service!"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review created"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/reviews/admin": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Get all reviews - Admin view (Admin only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All reviews across platform"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/reviews/me": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Get my reviews",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current user reviews"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/reviews/me/reservation/{reservationId}": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Get my review by reservation ID",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "reservationId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review data"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/reviews/{id}": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Get single review (Public)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review data"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Update review",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "comment": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Delete review",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get all users (Admin only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create user (Admin only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "email",
+                  "tel",
+                  "password"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Jane"
+                  },
+                  "email": {
+                    "type": "string",
+                    "example": "jane@example.com"
+                  },
+                  "tel": {
+                    "type": "string",
+                    "example": "082-000-0000"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "pass1234"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "user",
+                      "admin"
+                    ],
+                    "example": "user"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get single user (Admin only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User data"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update user (Admin only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": [
+                      "user",
+                      "admin"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Delete user (Admin only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/promotions": {
+      "get": {
+        "tags": [
+          "Promotions"
+        ],
+        "summary": "Get all promotions (Public)",
+        "responses": {
+          "200": {
+            "description": "List of promotions",
             "content": {
               "application/json": {
                 "schema": {
@@ -1095,7 +1451,199 @@
                       "type": "boolean"
                     },
                     "data": {
-                      "type": "object"
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Promotion"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Promotions"
+        ],
+        "summary": "Create promotion (Admin only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "amount",
+                  "startDate",
+                  "endDate"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "New Year Deal"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "example": 15
+                  },
+                  "startDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2024-12-31T00:00:00.000Z"
+                  },
+                  "endDate": {
+                    "type": "string",
+                    "format": "date-time",
+                    "example": "2025-01-07T00:00:00.000Z"
+                  },
+                  "isActive": {
+                    "type": "boolean",
+                    "example": true
+                  },
+                  "conditions": {
+                    "type": "object",
+                    "properties": {
+                      "enabled": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "minReservations": {
+                        "type": "number",
+                        "example": 0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Promotion created"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/promotions/{id}": {
+      "put": {
+        "tags": [
+          "Promotions"
+        ],
+        "summary": "Update promotion (Admin only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "amount": {
+                    "type": "number"
+                  },
+                  "isActive": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Promotions"
+        ],
+        "summary": "Delete promotion (Admin only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        }
+      }
+    },
+    "/api/notifications": {
+      "get": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Get my notifications",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of notifications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Notification"
+                      }
                     }
                   }
                 }
@@ -1103,23 +1651,246 @@
             }
           },
           "401": {
-            "description": "Unauthorized - Not logged in"
-          },
-          "403": {
-            "description": "Forbidden - Not an admin"
-          },
-          "404": {
-            "description": "Massage shop not found"
+            "description": "Unauthorized"
           }
         }
       }
     },
-    "/api/reservations": {
+    "/api/notifications/unread-count": {
       "get": {
-        "summary": "Get all reservations (own reservations for users, all for admins)",
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Get unread notification count",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unread count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "count": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/notifications/read-all": {
+      "put": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Mark all notifications as read",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All marked as read"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/notifications/{id}/read": {
+      "put": {
+        "tags": [
+          "Notifications"
+        ],
+        "summary": "Mark single notification as read",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Marked as read"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/api/uploads/presigned-url": {
+      "post": {
+        "tags": [
+          "Uploads"
+        ],
+        "summary": "Generate pre-signed upload URL",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "filename",
+                  "contentType"
+                ],
+                "properties": {
+                  "filename": {
+                    "type": "string",
+                    "example": "avatar.jpg"
+                  },
+                  "contentType": {
+                    "type": "string",
+                    "example": "image/jpeg"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pre-signed URL generated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "uploadUrl": {
+                      "type": "string"
+                    },
+                    "key": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/uploads/finalize": {
+      "post": {
+        "tags": [
+          "Uploads"
+        ],
+        "summary": "Finalize upload - save key to profile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "key"
+                ],
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "example": "uploads/uuid-avatar.jpg"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Upload finalized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "avatarUrl": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/cron/check-expiring-promotions": {
+      "get": {
+        "tags": [
+          "Cron"
+        ],
+        "summary": "Trigger check for expiring promotions",
+        "description": "Manually trigger the cron job that checks for expiring promotions and sends notifications.",
+        "responses": {
+          "200": {
+            "description": "Cron job executed"
+          }
+        }
+      }
+    },
+    "/api/massages/{massageId}/reservations": {
+      "get": {
         "tags": [
           "Reservations"
         ],
+        "summary": "Get all reservations",
+        "description": "Admin sees all reservations. User sees only their own.",
         "security": [
           {
             "bearerAuth": []
@@ -1151,483 +1922,9 @@
             }
           },
           "401": {
-            "description": "Unauthorized - Not logged in"
-          },
-          "500": {
-            "description": "Cannot find Reservation"
-          }
-        }
-      },
-      "post": {
-        "summary": "Create a new reservation (max 3 per user)",
-        "tags": [
-          "Reservations"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReservationInput"
-              }
-            }
+            "description": "Unauthorized"
           }
         },
-        "responses": {
-          "201": {
-            "description": "Reservation created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/Reservation"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid reserveDate, massage shop not found, or user already has 3 reservations"
-          },
-          "401": {
-            "description": "Unauthorized - Not logged in"
-          },
-          "500": {
-            "description": "Cannot create Reservations"
-          }
-        }
-      }
-    },
-    "/api/reservations/{id}": {
-      "get": {
-        "summary": "Get a single reservation",
-        "tags": [
-          "Reservations"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Reservation ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Reservation details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/Reservation"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Reservation not found"
-          },
-          "401": {
-            "description": "Unauthorized - Not logged in"
-          },
-          "500": {
-            "description": "Cannot find Reservation"
-          }
-        }
-      },
-      "put": {
-        "summary": "Update a reservation (owner or admin only)",
-        "tags": [
-          "Reservations"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Reservation ID"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReservationUpdateInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Reservation updated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/Reservation"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Not the reservation owner or admin"
-          },
-          "404": {
-            "description": "Reservation not found"
-          },
-          "500": {
-            "description": "Cannot update Reservation"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete a reservation (owner or admin only)",
-        "tags": [
-          "Reservations"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Reservation ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Reservation deleted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Not the reservation owner or admin"
-          },
-          "404": {
-            "description": "Reservation not found"
-          },
-          "500": {
-            "description": "Cannot delete Reservation"
-          }
-        }
-      }
-    },
-    "/api/reservations/{id}/rate": {
-      "patch": {
-        "summary": "Create a review for a reservation (owner only, integer 1–5, one-time)",
-        "tags": [
-          "Reservations"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Reservation ID"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": [
-                  "rating"
-                ],
-                "properties": {
-                  "rating": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 5,
-                    "example": 4
-                  },
-                  "comment": {
-                    "type": "string",
-                    "example": "Great service and relaxing atmosphere"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Review created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/Review"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid rating value or reservation already reviewed"
-          },
-          "401": {
-            "description": "Unauthorized - Not the reservation owner"
-          },
-          "404": {
-            "description": "Reservation not found"
-          },
-          "500": {
-            "description": "Cannot rate reservation"
-          }
-        }
-      }
-    },
-    "/api/reviews": {
-      "post": {
-        "summary": "Create a review for a reservation",
-        "tags": [
-          "Reviews"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ReviewInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Review created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/Review"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid rating value, missing reservation ID, or reservation already reviewed"
-          },
-          "401": {
-            "description": "Unauthorized - Not the reservation owner"
-          },
-          "404": {
-            "description": "Reservation not found"
-          },
-          "500": {
-            "description": "Cannot create review"
-          }
-        }
-      }
-    },
-    "/api/reviews/me": {
-      "get": {
-        "summary": "Get all reviews created by the logged-in user",
-        "tags": [
-          "Reviews"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of my reviews",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "count": {
-                      "type": "integer"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Review"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Not logged in"
-          },
-          "500": {
-            "description": "Cannot get user reviews"
-          }
-        }
-      }
-    },
-    "/api/reviews/me/reservation/{reservationId}": {
-      "get": {
-        "summary": "Get my review(s) by reservation ID for past reservations",
-        "tags": [
-          "Reviews"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "reservationId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Reservation ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "My review(s) for the reservation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "count": {
-                      "type": "integer"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Review"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid reservation ID or reservation is not in the past yet"
-          },
-          "401": {
-            "description": "Unauthorized - Not the reservation owner"
-          },
-          "404": {
-            "description": "Reservation not found"
-          },
-          "500": {
-            "description": "Cannot get user reviews by reservation ID"
-          }
-        }
-      }
-    },
-    "/api/massages/{massageId}/reservations": {
-      "get": {
-        "summary": "Get all reservations for a specific massage shop (Admin: all; User: own)",
-        "tags": [
-          "Reservations"
-        ],
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
         "parameters": [
           {
             "in": "path",
@@ -1638,59 +1935,16 @@
             },
             "description": "Massage shop ID"
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of reservations for the massage shop",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "count": {
-                      "type": "integer"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/Reservation"
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Not logged in"
-          },
-          "500": {
-            "description": "Cannot find Reservation"
-          }
-        }
+        ]
       },
       "post": {
-        "summary": "Create a reservation for a specific massage shop (max 3 per user)",
         "tags": [
           "Reservations"
         ],
+        "summary": "Create reservation",
         "security": [
           {
             "bearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "in": "path",
-            "name": "massageId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Massage shop ID (takes precedence over body massage field)"
           }
         ],
         "requestBody": {
@@ -1700,13 +1954,18 @@
               "schema": {
                 "type": "object",
                 "required": [
-                  "reserveDate"
+                  "reserveDate",
+                  "massage"
                 ],
                 "properties": {
                   "reserveDate": {
                     "type": "string",
                     "format": "date-time",
-                    "example": "2026-03-15T10:00:00.000Z"
+                    "example": "2024-12-01T10:00:00.000Z"
+                  },
+                  "massage": {
+                    "type": "string",
+                    "example": "64a1b2c3d4e5f6a7b8c9d0e1"
                   }
                 }
               }
@@ -1715,41 +1974,34 @@
         },
         "responses": {
           "201": {
-            "description": "Reservation created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/Reservation"
-                    }
-                  }
-                }
-              }
-            }
+            "description": "Reservation created"
           },
           "400": {
-            "description": "Invalid reserveDate, massage shop not found, or user already has 3 reservations"
+            "description": "Validation error"
           },
           "401": {
-            "description": "Unauthorized - Not logged in"
-          },
-          "500": {
-            "description": "Cannot create Reservations"
+            "description": "Unauthorized"
           }
-        }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "massageId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Massage shop ID"
+          }
+        ]
       }
     },
     "/api/massages/{massageId}/reservations/{id}": {
       "get": {
-        "summary": "Get a single reservation under a specific massage shop",
         "tags": [
           "Reservations"
         ],
+        "summary": "Get single reservation",
         "security": [
           {
             "bearerAuth": []
@@ -1771,45 +2023,26 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Reservation ID"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Reservation details",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/Reservation"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Reservation not found"
+            "description": "Reservation data"
           },
           "401": {
-            "description": "Unauthorized - Not logged in"
+            "description": "Unauthorized"
           },
-          "500": {
-            "description": "Cannot find Reservation"
+          "404": {
+            "description": "Not found"
           }
         }
       },
       "put": {
-        "summary": "Update a reservation under a specific massage shop (owner or admin only)",
         "tags": [
           "Reservations"
         ],
+        "summary": "Update reservation",
         "security": [
           {
             "bearerAuth": []
@@ -1831,8 +2064,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Reservation ID"
+            }
           }
         ],
         "requestBody": {
@@ -1840,49 +2072,34 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ReservationUpdateInput"
+                "type": "object",
+                "properties": {
+                  "reserveDate": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Reservation updated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "$ref": "#/components/schemas/Reservation"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid reserveDate"
+            "description": "Updated successfully"
           },
           "401": {
-            "description": "Unauthorized - Not the reservation owner or admin"
+            "description": "Unauthorized"
           },
           "404": {
-            "description": "Reservation not found"
-          },
-          "500": {
-            "description": "Cannot update Reservation"
+            "description": "Not found"
           }
         }
       },
       "delete": {
-        "summary": "Delete a reservation under a specific massage shop (owner or admin only)",
         "tags": [
           "Reservations"
         ],
+        "summary": "Delete reservation",
         "security": [
           {
             "bearerAuth": []
@@ -1904,47 +2121,28 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Reservation ID"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Reservation deleted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object"
-                    }
-                  }
-                }
-              }
-            }
+            "description": "Deleted successfully"
           },
           "401": {
-            "description": "Unauthorized - Not the reservation owner or admin"
+            "description": "Unauthorized"
           },
           "404": {
-            "description": "Reservation not found"
-          },
-          "500": {
-            "description": "Cannot delete Reservation"
+            "description": "Not found"
           }
         }
       }
     },
     "/api/massages/{massageId}/reservations/{id}/rate": {
       "patch": {
-        "summary": "Create a review under a specific massage shop (owner only, integer 1–5, one-time)",
         "tags": [
           "Reservations"
         ],
+        "summary": "Rate a reservation (1-5 stars)",
         "security": [
           {
             "bearerAuth": []
@@ -1966,8 +2164,68 @@
             "required": true,
             "schema": {
               "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "rating"
+                ],
+                "properties": {
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5,
+                    "example": 5
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rated successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/massages/{massageId}/reservations/{id}/review": {
+      "patch": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "Add review to reservation",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "massageId",
+            "required": true,
+            "schema": {
+              "type": "string"
             },
-            "description": "Reservation ID"
+            "description": "Massage shop ID"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -1988,7 +2246,7 @@
                   },
                   "comment": {
                     "type": "string",
-                    "example": "Great service and relaxing atmosphere"
+                    "example": "Great service!"
                   }
                 }
               }
@@ -1997,7 +2255,34 @@
         },
         "responses": {
           "200": {
-            "description": "Review created successfully",
+            "description": "Review added"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/massages/{massageId}/reviews": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Get reviews for a massage shop (Public)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "massageId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Massage shop ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of reviews for the massage shop",
             "content": {
               "application/json": {
                 "schema": {
@@ -2006,38 +2291,41 @@
                     "success": {
                       "type": "boolean"
                     },
+                    "count": {
+                      "type": "integer"
+                    },
                     "data": {
-                      "$ref": "#/components/schemas/Review"
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Review"
+                      }
                     }
                   }
                 }
               }
             }
-          },
-          "400": {
-            "description": "Invalid rating value or reservation already reviewed"
-          },
-          "401": {
-            "description": "Unauthorized - Not the reservation owner"
-          },
-          "404": {
-            "description": "Reservation not found"
-          },
-          "500": {
-            "description": "Cannot rate reservation"
           }
         }
-      }
-    },
-    "/api/uploads/presigned-url": {
+      },
       "post": {
-        "summary": "Generate R2 presigned PUT URL for avatar or massage image",
         "tags": [
-          "Uploads"
+          "Reviews"
         ],
+        "summary": "Create review for a massage shop",
         "security": [
           {
             "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "massageId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Massage shop ID"
           }
         ],
         "requestBody": {
@@ -2045,63 +2333,103 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/GenerateUploadUrlRequest"
+                "type": "object",
+                "required": [
+                  "reservation",
+                  "rating"
+                ],
+                "properties": {
+                  "reservation": {
+                    "type": "string",
+                    "example": "64a1b2c3d4e5f6a7b8c9d0e1"
+                  },
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5,
+                    "example": 5
+                  },
+                  "comment": {
+                    "type": "string",
+                    "example": "Excellent service!"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Presigned URL generated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GenerateUploadUrlResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid target/contentType/massageId",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+          "201": {
+            "description": "Review created"
           },
           "401": {
             "description": "Unauthorized"
-          },
-          "403": {
-            "description": "Forbidden for non-admin massage uploads"
-          },
-          "404": {
-            "description": "Massage shop not found"
-          },
-          "500": {
-            "description": "R2 configuration/server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
           }
         }
       }
     },
-    "/api/uploads/finalize": {
-      "post": {
-        "summary": "Finalize uploaded file and persist avatar/massage picture",
+    "/api/massages/{massageId}/reviews/{id}": {
+      "get": {
         "tags": [
-          "Uploads"
+          "Reviews"
         ],
+        "summary": "Get single review for a massage shop (Public)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "massageId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Massage shop ID"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Review ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review data"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Update review for a massage shop",
         "security": [
           {
             "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "massageId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Massage shop ID"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -2109,60 +2437,116 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/FinalizeUploadRequest"
+                "type": "object",
+                "properties": {
+                  "rating": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "comment": {
+                    "type": "string"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Upload finalized and record updated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/FinalizeAvatarUploadResponse"
-                    },
-                    {
-                      "$ref": "#/components/schemas/FinalizeMassageUploadResponse"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid key/target/massageId",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "Updated"
           },
           "401": {
             "description": "Unauthorized"
           },
-          "403": {
-            "description": "Forbidden for non-admin massage finalize"
+          "404": {
+            "description": "Not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Delete review for a massage shop",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "massageId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Massage shop ID"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deleted"
+          },
+          "401": {
+            "description": "Unauthorized"
           },
           "404": {
-            "description": "Massage shop not found"
-          },
-          "500": {
-            "description": "R2 configuration/server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+            "description": "Not found"
           }
         }
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "Health",
+      "description": "Server health check"
+    },
+    {
+      "name": "Authentication",
+      "description": "User authentication and profile management"
+    },
+    {
+      "name": "Massages",
+      "description": "Massage shop CRUD operations"
+    },
+    {
+      "name": "Reservations",
+      "description": "Reservation management"
+    },
+    {
+      "name": "Reviews",
+      "description": "Review and rating system"
+    },
+    {
+      "name": "Users",
+      "description": "User management (Admin only)"
+    },
+    {
+      "name": "Promotions",
+      "description": "Promotion management"
+    },
+    {
+      "name": "Notifications",
+      "description": "User notification system"
+    },
+    {
+      "name": "Uploads",
+      "description": "File upload via R2/S3 pre-signed URLs"
+    },
+    {
+      "name": "Cron",
+      "description": "Scheduled job triggers"
+    }
+  ]
 }
